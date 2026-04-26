@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './hero.html',
+  styleUrl: './hero.css',
 })
 export class HeroComponent {
   heroBg = 'assets/hero-bg.jpg';

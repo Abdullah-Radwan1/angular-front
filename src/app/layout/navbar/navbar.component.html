@@ -1,46 +1,39 @@
-<nav
-  class="fixed top-0 left-0 right-0 z-50 transition-all text-white duration-300"
-  [ngClass]="{
-    'bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm': scrolled,
-    'bg-transparent': !scrolled,
-  }"
->
-  <div class="container mx-auto flex items-center justify-between px-4 py-4 md:px-0">
-    <a href="#" class="font-display text-lg font-bold text-foreground">&lt;Abdullah /&gt;</a>
+<nav class="navbar" [class.scrolled]="scrolled">
+  <div class="navbar-container">
+    <!-- Logo -->
+    <a routerLink="/" class="logo"> &lt;Abdullah /&gt; </a>
 
-    <div class="hidden md:flex items-center gap-10">
-      <ul nz-menu nzMode="horizontal" class="bg-transparent border-0">
-        <li nz-menu-item *ngFor="let link of navLinks" class="px-0">
-          <a
-            [href]="link.href"
-            class="text-sm text-foreground hover:text-primary transition-colors duration-200"
-          >
-            {{ link.label }}
-          </a>
-        </li>
+    <!-- Desktop Menu -->
+    <div class="nav-desktop">
+      <ul class="nav-links">
+        @for (link of navLinks; track link.path) {
+          <li>
+            <a [routerLink]="link.path">
+              {{ link.label }}
+            </a>
+          </li>
+        }
       </ul>
     </div>
 
-    <div class="md:hidden flex items-center gap-3">
-      <button nz-button nzType="text" class="text-foreground" (click)="openMobile()">
-        <span nz-icon nzType="menu"></span>
+    <!-- Mobile -->
+    <div class="nav-mobile">
+      <button class="menu-toggle" (click)="toggleMobile()">
+        {{ mobileOpen ? '✕' : '☰' }}
       </button>
     </div>
   </div>
 
-  <nz-drawer
-    [nzVisible]="mobileOpen"
-    nzPlacement="left"
-    nzTitle="Menu"
-    [nzMaskStyle]="{ backdropFilter: 'blur(10px)' }"
-    (nzOnClose)="closeMobile()"
-  >
-    <ul nz-menu nzMode="inline" class="mt-4">
-      <li nz-menu-item *ngFor="let link of navLinks">
-        <a [href]="link.href" (click)="closeMobile()" class="block w-full py-3 text-foreground">
-          {{ link.label }}
-        </a>
-      </li>
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" [class.open]="mobileOpen">
+    <ul>
+      @for (link of navLinks; track link.path) {
+        <li>
+          <a [routerLink]="link.path" (click)="mobileOpen = false">
+            {{ link.label }}
+          </a>
+        </li>
+      }
     </ul>
-  </nz-drawer>
+  </div>
 </nav>
