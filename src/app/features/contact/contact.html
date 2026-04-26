@@ -1,0 +1,115 @@
+<section id="contact" class="contact-section">
+  <div class="contact-container">
+    <!-- Header -->
+    <div class="contact-header">
+      <p class="contact-subtitle">{{ sectionTitle }}</p>
+      <h2 class="contact-title">{{ sectionHeading }}</h2>
+      <p class="contact-description">{{ sectionDescription }}</p>
+    </div>
+
+    <div class="contact-layout">
+      <!-- Left: Info -->
+      <div class="contact-info">
+        <div class="info-card">
+          <div class="info-icon">
+            <ng-icon name="heroPhone" size="20" />
+          </div>
+          <div>
+            <p class="info-label">Phone</p>
+            <a [href]="'tel:' + phone" class="info-value">{{ phone }}</a>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-icon">
+            <ng-icon name="heroEnvelope" size="20" />
+          </div>
+          <div>
+            <p class="info-label">Email</p>
+            <a [href]="'mailto:' + email" class="info-value">{{ email }}</a>
+          </div>
+        </div>
+
+        <!-- Decorative blob -->
+        <div class="info-blob" aria-hidden="true"></div>
+      </div>
+
+      <!-- Right: Form -->
+      <div class="contact-form-wrapper">
+        @if (!submitted()) {
+          <form class="contact-form" (ngSubmit)="onSubmit()" #contactForm="ngForm">
+            <!-- Name -->
+            <div class="form-group">
+              <label class="form-label" for="name">Full Name</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <ng-icon name="heroUser" size="16" />
+                </span>
+                <input
+                  id="name"
+                  type="text"
+                  class="form-input"
+                  placeholder="John Doe"
+                  [(ngModel)]="name"
+                  name="name"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address</label>
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <ng-icon name="heroEnvelope" size="16" />
+                </span>
+                <input
+                  id="email"
+                  type="email"
+                  class="form-input"
+                  placeholder="john@example.com"
+                  [(ngModel)]="senderEmail"
+                  name="senderEmail"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Message -->
+            <div class="form-group">
+              <label class="form-label" for="message">Message</label>
+              <div class="input-wrapper textarea-wrapper">
+                <span class="input-icon textarea-icon">
+                  <ng-icon name="heroChatBubbleLeftRight" size="16" />
+                </span>
+                <textarea
+                  id="message"
+                  class="form-input form-textarea"
+                  placeholder="Tell me about your project..."
+                  [(ngModel)]="message"
+                  name="message"
+                  rows="5"
+                  required
+                ></textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+              <ng-icon name="heroPaperAirplane" size="18" />
+              Send Message
+            </button>
+          </form>
+        } @else {
+          <!-- Success State -->
+          <div class="success-state">
+            <div class="success-icon">✓</div>
+            <h3 class="success-title">Message Sent!</h3>
+            <p class="success-text">Thanks for reaching out. I'll get back to you soon.</p>
+            <button class="reset-btn" (click)="reset()">Send Another</button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

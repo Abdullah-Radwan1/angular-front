@@ -1,0 +1,68 @@
+<section #sectionRef id="experience" class="experience-section">
+  <div class="experience-container">
+    <!-- Header -->
+    <div class="experience-header fade-up" [class.show]="inView()">
+      <p class="experience-subtitle">{{ sectionTitle }}</p>
+      <h2 class="experience-title">{{ sectionHeading }}</h2>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline">
+      @for (exp of experiences; track exp.company; let i = $index) {
+        <div
+          class="timeline-item fade-up"
+          [class.show]="inView()"
+          [style.transitionDelay]="getDelay(i)"
+        >
+          <!-- Line & Dot -->
+          <div class="timeline-track">
+            <div class="timeline-dot">
+              <ng-icon name="heroBriefcase" size="14" />
+            </div>
+            <div class="timeline-line"></div>
+          </div>
+
+          <!-- Card -->
+          <div class="experience-card">
+            <!-- Top Row -->
+            <div class="card-top">
+              <div class="card-meta">
+                <div class="role-row">
+                  <h3 class="role-title">{{ exp.role }}</h3>
+                  @if (exp.current) {
+                    <span class="badge-current">Current</span>
+                  }
+                </div>
+                <span class="company-name">{{ exp.company }}</span>
+              </div>
+
+              <div class="card-info">
+                <span class="info-chip">
+                  <ng-icon name="heroCalendarDays" size="14" />
+                  {{ exp.period }}
+                </span>
+                <span class="info-chip">
+                  <ng-icon name="heroMapPin" size="14" />
+                  {{ exp.location }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="card-divider"></div>
+
+            <!-- Bullets -->
+            <ul class="bullet-list">
+              @for (bullet of exp.bullets; track bullet) {
+                <li class="bullet-item">
+                  <ng-icon name="heroCheckCircle" size="16" class="bullet-icon" />
+                  <span>{{ bullet }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

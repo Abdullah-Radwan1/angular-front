@@ -1,0 +1,50 @@
+<section #sectionRef id="projects" class="projects-section">
+  <div class="projects-container">
+    <!-- Header -->
+    <div class="projects-header fade-up" [class.show]="inView()">
+      <p class="projects-subtitle">{{ sectionTitle }}</p>
+      <h2 class="projects-title">{{ sectionHeading }}</h2>
+    </div>
+
+    <!-- Grid -->
+    <div class="projects-grid">
+      @for (project of projects; track project.title; let i = $index) {
+        <div
+          class="project-card fade-up"
+          [class.show]="inView()"
+          [style.transitionDelay]="getDelay(i)"
+        >
+          <!-- Image -->
+          <div class="card-image-wrapper">
+            <img [src]="project.image" [alt]="project.title" class="card-image" loading="lazy" />
+            <!-- Overlay -->
+            <div class="card-overlay">
+              <a [href]="project.github" target="_blank" class="overlay-btn" aria-label="GitHub">
+                <ng-icon name="heroCodeBracket" size="18" />
+              </a>
+              <a
+                [href]="project.live"
+                target="_blank"
+                class="overlay-btn"
+                aria-label="Live Preview"
+              >
+                <ng-icon name="heroArrowTopRightOnSquare" size="18" />
+              </a>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="card-body">
+            <h3 class="card-title">{{ project.title }}</h3>
+            <p class="card-description">{{ project.description }}</p>
+            <div class="card-tags">
+              @for (tech of project.tech; track tech) {
+                <span class="card-tag">{{ tech }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>

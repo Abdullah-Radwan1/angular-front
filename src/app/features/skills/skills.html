@@ -1,0 +1,45 @@
+<section #sectionRef id="skills" class="skills-section">
+  <div class="skills-container">
+    <!-- Header -->
+    <div class="skills-header fade-up" [class.show]="inView()">
+      <p class="skills-subtitle">
+        {{ skillsData.title }}
+      </p>
+
+      <h2 class="skills-title">
+        {{ skillsData.heading }}
+      </h2>
+    </div>
+
+    <!-- Grid -->
+    <div class="skills-grid">
+      @for (cat of categories; track cat.key; let i = $index) {
+        <div
+          class="skill-card fade-up"
+          [class.show]="inView()"
+          [style.transitionDelay.ms]="i * 100"
+        >
+          <!-- Card Header -->
+          <div class="skill-card-header">
+            <div class="icon-wrapper">
+              <ng-icon [name]="cat.icon" size="22" />
+            </div>
+
+            <h3 class="skill-card-title">
+              {{ getCategoryData(cat.key).title }}
+            </h3>
+          </div>
+
+          <!-- Skills -->
+          <div class="skill-tags">
+            @for (skill of getCategoryData(cat.key).skills; track skill) {
+              <span class="skill-tag">
+                {{ skill }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
