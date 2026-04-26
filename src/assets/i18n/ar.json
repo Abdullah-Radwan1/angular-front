@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "about": "حول",
+    "skills": "المهارات",
+    "projects": "المشاريع",
+    "contact": "التواصل"
+  },
+  "language": {
+    "arabic": "العربية",
+    "english": "English"
+  },
+  "hero": {
+    "title": "عبدالله رضوان",
+    "heading": {
+      "part1": "مهندس برمجيات متخصص في",
+      "highlight": "Next.js، Angular، و Node.js",
+      "part2": "الهياكل."
+    },
+    "description": "بناء تطبيقات ويب قابلة للتوسع باستخدام التقنيات الحديثة.",
+    "viewProjects": "عرض المشاريع",
+    "contactMe": "تواصل معي"
+  },
+  "home": {
+    "title": "عبدالله رضوان",
+    "description": "مهندس برمجيات متخصص في Next.js، Angular، و Node.js الهياكل.",
+    "viewProjects": "عرض المشاريع",
+    "contact": "تواصل معي"
+  }
+}
