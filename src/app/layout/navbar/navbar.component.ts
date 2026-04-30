@@ -1,18 +1,12 @@
 import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, NzMenuModule, NzButtonModule, NzIconModule, NzDrawerModule, RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.css',
 })
 export class NavbarComponent {
   scrolled = false;
@@ -22,7 +16,7 @@ export class NavbarComponent {
     { label: 'Skills', path: '/skills' },
     { label: 'Projects', path: '/projects' },
     { label: 'Experience', path: '/experience' },
-    { label: 'Contact', path: '/contact' },
+    { label: 'Dashboard', path: '/dashboard' },
   ];
 
   @HostListener('window:scroll')
@@ -30,14 +24,11 @@ export class NavbarComponent {
     this.scrolled = window.scrollY > 50;
   }
 
-  openMobile() {
-    this.mobileOpen = true;
+  toggleMobile() {
+    this.mobileOpen = !this.mobileOpen;
   }
 
   closeMobile() {
     this.mobileOpen = false;
-  }
-  toggleMobile() {
-    this.mobileOpen = !this.mobileOpen;
   }
 }

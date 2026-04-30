@@ -1,6 +1,16 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  OnInit,
+  signal,
+  computed,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
+
 import {
   heroComputerDesktop,
   heroPaintBrush,
@@ -10,17 +20,13 @@ import {
   heroCog6Tooth,
 } from '@ng-icons/heroicons/outline';
 
-type SkillCategoryKey = 'frontend' | 'ui' | 'backend' | 'apis' | 'databases' | 'devops';
-
-type SkillCategory = {
-  key: SkillCategoryKey;
-  icon: string;
-};
+import { SkillsService, Skill, SkillCategoryKey } from './skills.service';
+import { LoaderComponent } from '../../components/loader/loader';
 
 @Component({
   selector: 'app-skills',
   standalone: true,
-  imports: [CommonModule, NgIconComponent],
+  imports: [CommonModule, NgIconComponent, LoaderComponent],
   providers: [
     provideIcons({
       heroComputerDesktop,
@@ -32,51 +38,52 @@ type SkillCategory = {
     }),
   ],
   templateUrl: './skills.html',
-  styleUrl: './skills.css',
 })
-export class SkillsComponent implements AfterViewInit {
-  @ViewChild('sectionRef') sectionRef!: ElementRef;
+export class SkillsComponent implements AfterViewInit, OnInit {
+  @ViewChild('sectionRef', { static: true }) sectionRef!: ElementRef;
+
+  private dataService = inject(SkillsService);
+
   inView = signal(false);
+  skills = signal<Skill[] | null>(null);
+  loading = signal(false);
+  categories = [
+    { key: 'frontend', title: 'Frontend', icon: 'heroComputerDesktop' },
+    { key: 'ui', title: 'UI & Styling', icon: 'heroPaintBrush' },
+    { key: 'backend', title: 'Backend', icon: 'heroServer' },
+    { key: 'apis', title: 'APIs', icon: 'heroGlobeAlt' },
+    { key: 'databases', title: 'Databases', icon: 'heroCircleStack' },
+    { key: 'devops', title: 'DevOps & Tools', icon: 'heroCog6Tooth' },
+  ] as const;
 
-  categories: SkillCategory[] = [
-    { key: 'frontend', icon: 'heroComputerDesktop' },
-    { key: 'ui', icon: 'heroPaintBrush' },
-    { key: 'backend', icon: 'heroServer' },
-    { key: 'apis', icon: 'heroGlobeAlt' },
-    { key: 'databases', icon: 'heroCircleStack' },
-    { key: 'devops', icon: 'heroCog6Tooth' },
-  ];
+  // 🔥 group skills by category
+  groupedSkills = computed(() => {
+    const data = this.skills() ?? [];
 
-  skillsData = {
-    title: 'Skills',
-    heading: 'My Tech Stack',
-    categories: {
-      frontend: {
-        title: 'Frontend',
-        skills: ['Next.js', 'Angular', 'React Native', 'TypeScript', 'Redux', 'Zustand'],
+    return this.categories.reduce(
+      (acc, cat) => {
+        acc[cat.key] = data
+          .filter((s) => s.category === cat.key)
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        return acc;
       },
-      ui: {
-        title: 'UI & Styling',
-        skills: ['Tailwind CSS', 'ShadCN UI', 'MUI', 'Sass'],
+      {} as Record<SkillCategoryKey, Skill[]>,
+    );
+  });
+
+  ngOnInit() {
+    if (!this.skills()) {
+      this.loading.set(true);
+    }
+    this.dataService.getSkills().subscribe({
+      next: (data) => {
+        this.skills.set(data);
+
+        this.loading.set(false);
       },
-      backend: {
-        title: 'Backend',
-        skills: ['Node.js', 'NestJS', 'Express.js', 'Laravel'],
-      },
-      apis: {
-        title: 'APIs',
-        skills: ['REST', 'GraphQL'],
-      },
-      databases: {
-        title: 'Databases',
-        skills: ['Drizzle', 'Prisma', 'MongoDB', 'PostgreSQL', 'Convex'],
-      },
-      devops: {
-        title: 'DevOps & Tools',
-        skills: ['Docker', 'Linux', 'CI/CD', 'Git', 'GitHub Actions'],
-      },
-    },
-  };
+      error: (err) => console.error(err),
+    });
+  }
 
   ngAfterViewInit() {
     const observer = new IntersectionObserver(
@@ -90,9 +97,5 @@ export class SkillsComponent implements AfterViewInit {
     );
 
     observer.observe(this.sectionRef.nativeElement);
-  }
-
-  getCategoryData(key: SkillCategoryKey) {
-    return this.skillsData.categories[key];
   }
 }

@@ -1,39 +1,52 @@
-<nav class="navbar" [class.scrolled]="scrolled">
-  <div class="navbar-container">
-    <!-- Logo -->
-    <a routerLink="/" class="logo"> &lt;Abdullah /&gt; </a>
-
-    <!-- Desktop Menu -->
-    <div class="nav-desktop">
-      <ul class="nav-links">
+<nav
+  class="navbar bg-base-100/80 backdrop-blur border-b border-base-300"
+  [class.scrolled]="scrolled"
+>
+  <div class="navbar-start">
+    <div class="dropdown" [class.dropdown-open]="mobileOpen">
+      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden" (click)="toggleMobile()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h8m-8 6h16"
+          />
+        </svg>
+      </div>
+      <ul
+        tabindex="0"
+        class="menu menu-sm dropdown-content mt-3 z-1 p-2 shadow bg-base-100 rounded-box w-52"
+      >
         @for (link of navLinks; track link.path) {
           <li>
-            <a [routerLink]="link.path">
+            <a [routerLink]="link.path" (click)="closeMobile()">
               {{ link.label }}
             </a>
           </li>
         }
       </ul>
     </div>
-
-    <!-- Mobile -->
-    <div class="nav-mobile">
-      <button class="menu-toggle" (click)="toggleMobile()">
-        {{ mobileOpen ? '✕' : '☰' }}
-      </button>
-    </div>
+    <a routerLink="/" class="btn btn-ghost text-xl">&lt;Abdullah /&gt;</a>
   </div>
-
-  <!-- Mobile Menu -->
-  <div class="mobile-menu" [class.open]="mobileOpen">
-    <ul>
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
       @for (link of navLinks; track link.path) {
         <li>
-          <a [routerLink]="link.path" (click)="mobileOpen = false">
+          <a [routerLink]="link.path">
             {{ link.label }}
           </a>
         </li>
       }
     </ul>
+  </div>
+  <div class="navbar-end">
+    <!-- Add any end content if needed -->
   </div>
 </nav>

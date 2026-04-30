@@ -1,0 +1,38 @@
+<div class="space-y-4">
+  <div class="flex justify-between items-center">
+    <h3 class="text-lg font-semibold">Experience</h3>
+    <button class="btn btn-primary btn-sm" (click)="onAdd()">+ Add Experience</button>
+  </div>
+
+  <div class="card bg-base-100 border border-base-300 shadow-md">
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr class="text-xs uppercase opacity-60">
+            <th>Role</th>
+            <th>Company</th>
+            <th>Period</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let experience of experiences" class="hover">
+            <td class="font-medium">{{ experience.role }}</td>
+            <td>{{ experience.company }}</td>
+            <td>{{ experience.period }}</td>
+            <td>
+              <span class="badge badge-sm" [class.badge-success]="experience.current">
+                {{ experience.current ? 'Current' : 'Past' }}
+              </span>
+            </td>
+            <td class="text-right space-x-2">
+              <button class="btn btn-xs" (click)="onEdit(experience)">Edit</button>
+              <button class="btn btn-xs btn-error" (click)="onDelete(experience)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

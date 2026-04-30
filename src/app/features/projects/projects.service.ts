@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
-import { URL } from '../env';
+import { URL } from '../../core/env';
 // project.model.ts
 export interface Project {
   _id?: string; // MongoDB id
@@ -12,7 +12,7 @@ export interface Project {
   technologies: string[];
   liveUrl?: string;
   repoUrl?: string;
-  imageUrl?: string;
+  image?: string;
   order?: number;
   createdAt?: string;
   updatedAt?: string;
@@ -23,26 +23,26 @@ export class ProjectService {
 
   // GET ALL
   getProjects(): Observable<Project[]> {
-    return this.http.get<Project[]>(URL);
+    return this.http.get<Project[]>(`${URL}/projects`);
   }
 
   // GET BY ID
   getProject(id: string): Observable<Project> {
-    return this.http.get<Project>(`${URL}/${id}`);
+    return this.http.get<Project>(`${URL}/projects/${id}`);
   }
 
   // CREATE
   createProject(project: Project): Observable<Project> {
-    return this.http.post<Project>(URL, project);
+    return this.http.post<Project>(`${URL}/projects`, project);
   }
 
   // UPDATE
   updateProject(id: string, project: Project): Observable<Project> {
-    return this.http.put<Project>(`${URL}/${id}`, project);
+    return this.http.put<Project>(`${URL}/projects/${id}`, project);
   }
 
   // DELETE
   deleteProject(id: string): Observable<void> {
-    return this.http.delete<void>(`${URL}/${id}`);
+    return this.http.delete<void>(`${URL}/projects/${id}`);
   }
 }

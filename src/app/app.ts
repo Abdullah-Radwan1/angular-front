@@ -7,7 +7,6 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   imports: [NavbarComponent, Footer, RouterOutlet],
   templateUrl: './app.html',
-  styleUrl: './app.css',
 })
 export class App {
   protected readonly title = signal('eceommerce');

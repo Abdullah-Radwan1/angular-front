@@ -1,0 +1,108 @@
+<section class="px-4 py-6 md:px-8 bg-base-100 min-h-screen">
+  <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="card bg-base-200 border border-base-300 shadow-sm">
+      <div class="card-body">
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h2>
+        <p class="opacity-70 text-sm">Manage your experience, skills, and projects.</p>
+      </div>
+    </div>
+
+    <!-- Alert -->
+    <div
+      *ngIf="messageText"
+      class="alert shadow-sm"
+      [class.alert-success]="messageType === 'success'"
+      [class.alert-error]="messageType === 'error'"
+    >
+      <span>{{ messageText }}</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex justify-center">
+      <div role="tablist" class="tabs tabs-box bg-base-200 p-1 rounded-xl">
+        <button
+          role="tab"
+          class="tab px-6"
+          [class.tab-active]="activeTab === 'projects'"
+          (click)="setActiveTab('projects')"
+        >
+          Projects
+        </button>
+
+        <button
+          role="tab"
+          class="tab px-6"
+          [class.tab-active]="activeTab === 'skills'"
+          (click)="setActiveTab('skills')"
+        >
+          Skills
+        </button>
+
+        <button
+          role="tab"
+          class="tab px-6"
+          [class.tab-active]="activeTab === 'experience'"
+          (click)="setActiveTab('experience')"
+        >
+          Experience
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div [ngSwitch]="activeTab">
+      <!-- PROJECTS -->
+      <app-projects-table
+        *ngSwitchCase="'projects'"
+        [projects]="(projects$ | async) ?? []"
+        (add)="onAddProject()"
+        (edit)="onEditProject($event)"
+        (delete)="onDeleteProject($event)"
+      ></app-projects-table>
+
+      <!-- SKILLS -->
+      <app-skills-table
+        *ngSwitchCase="'skills'"
+        [skills]="(skills$ | async) ?? []"
+        (add)="onAddSkill()"
+        (edit)="onEditSkill($event)"
+        (delete)="onDeleteSkill($event)"
+      ></app-skills-table>
+
+      <!-- EXPERIENCE -->
+      <app-experience-table
+        *ngSwitchCase="'experience'"
+        [experiences]="(experiences$ | async) ?? []"
+        (add)="onAddExperience()"
+        (edit)="onEditExperience($event)"
+        (delete)="onDeleteExperience($event)"
+      ></app-experience-table>
+    </div>
+
+    <!-- Modals -->
+    <app-projects-form-modal
+      [isVisible]="isProjectModalVisible"
+      [project]="editingProject"
+      (save)="onSaveProject($event)"
+      (close)="onCloseProjectModal()"
+    ></app-projects-form-modal>
+
+    <app-skills-form-modal
+      [isVisible]="isSkillModalVisible"
+      [skill]="editingSkill"
+      (save)="onSaveSkill($event)"
+      (close)="onCloseSkillModal()"
+    ></app-skills-form-modal>
+
+    <app-experience-form-modal
+      [isVisible]="isExperienceModalVisible"
+      [experience]="editingExperience"
+      (save)="onSaveExperience($event)"
+      (close)="onCloseExperienceModal()"
+    ></app-experience-form-modal>
+
+    <!-- Confirm Dialog -->
+    <app-confirm-dialog #confirmDialog></app-confirm-dialog>
+  </div>
+</section>

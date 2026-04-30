@@ -4,6 +4,5 @@ import { Component } from '@angular/core';
   selector: 'app-cursor',
   imports: [],
   templateUrl: './cursor.html',
-  styleUrl: './cursor.css',
 })
 export class Cursor {}

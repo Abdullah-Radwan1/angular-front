@@ -1,50 +1,65 @@
-<section #sectionRef id="projects" class="projects-section">
-  <div class="projects-container">
+<section #sectionRef id="projects" class="px-4 py-20 md:px-8">
+  <div class="mx-auto max-w-6xl">
     <!-- Header -->
-    <div class="projects-header fade-up" [class.show]="inView()">
-      <p class="projects-subtitle">{{ sectionTitle }}</p>
-      <h2 class="projects-title">{{ sectionHeading }}</h2>
+    <div class="fade-up mx-auto mb-12 max-w-3xl text-center" [class.show]="inView()">
+      <p class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-primary">{{ sectionTitle }}</p>
+      <h2 class="text-3xl font-extrabold md:text-5xl">{{ sectionHeading }}</h2>
     </div>
 
     <!-- Grid -->
-    <div class="projects-grid">
-      @for (project of projects; track project.title; let i = $index) {
-        <div
-          class="project-card fade-up"
-          [class.show]="inView()"
-          [style.transitionDelay]="getDelay(i)"
-        >
-          <!-- Image -->
-          <div class="card-image-wrapper">
-            <img [src]="project.image" [alt]="project.title" class="card-image" loading="lazy" />
-            <!-- Overlay -->
-            <div class="card-overlay">
-              <a [href]="project.github" target="_blank" class="overlay-btn" aria-label="GitHub">
-                <ng-icon name="heroCodeBracket" size="18" />
-              </a>
-              <a
-                [href]="project.live"
-                target="_blank"
-                class="overlay-btn"
-                aria-label="Live Preview"
-              >
-                <ng-icon name="heroArrowTopRightOnSquare" size="18" />
-              </a>
+    @if (loading()) {
+      <app-loader />
+    } @else {
+      <div class="grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-3">
+        @for (project of projects(); track project.title; let i = $index) {
+          <div
+            class="group fade-up card border border-base-300 bg-base-200 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+            [class.show]="inView()"
+            }
+            [style.transitionDelay]="getDelay(i)"
+          >
+            <!-- Image -->
+            <div class="relative aspect-video overflow-hidden">
+              <img
+                [src]="project.image"
+                [alt]="project.title"
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+              <!-- Overlay -->
+              <div class="absolute inset-0 flex items-center justify-center gap-3 bg-black/55 opacity-0 transition hover:opacity-100">
+                <a
+                  [href]="project.repoUrl"
+                  target="_blank"
+                  class="overlay-btn btn btn-sm btn-circle btn-neutral"
+                  aria-label="GitHub"
+                >
+                  <ng-icon name="heroCodeBracket" size="18" />
+                </a>
+                <a
+                  [href]="project.liveUrl"
+                  target="_blank"
+                  class="overlay-btn btn btn-sm btn-circle btn-primary"
+                  aria-label="Live Preview"
+                >
+                  <ng-icon name="heroArrowTopRightOnSquare" size="18" />
+                </a>
+              </div>
             </div>
-          </div>
 
-          <!-- Content -->
-          <div class="card-body">
-            <h3 class="card-title">{{ project.title }}</h3>
-            <p class="card-description">{{ project.description }}</p>
-            <div class="card-tags">
-              @for (tech of project.tech; track tech) {
-                <span class="card-tag">{{ tech }}</span>
-              }
+            <!-- Content -->
+            <div class="card-body">
+              <h3 class="card-title text-lg">{{ project.title }}</h3>
+              <p class="text-sm leading-6 text-base-content/70">{{ project.description }}</p>
+              <div class="mt-2 flex flex-wrap gap-2">
+                @for (tech of project.technologies; track tech) {
+                  <span class="badge badge-outline">{{ tech }}</span>
+                }
+              </div>
             </div>
           </div>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
   </div>
 </section>

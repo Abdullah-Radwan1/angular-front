@@ -4,6 +4,7 @@ import { ContactComponent } from './features/contact/contact';
 import { SkillsComponent } from './features/skills/skills';
 import { ProjectsComponent } from './features/projects/projects';
 import { ExperienceComponent } from './features/experience/experience';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 export const routes: Routes = [
   { path: '', component: Home }, // "/" → Home
@@ -16,8 +17,8 @@ export const routes: Routes = [
     component: ExperienceComponent,
   },
   {
-    path: 'contact',
-    component: ContactComponent,
+    path: 'dashboard',
+    component: DashboardComponent,
   },
   {
     path: 'skills',

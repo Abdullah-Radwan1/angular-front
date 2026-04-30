@@ -18,7 +18,6 @@ import {
     provideIcons({ heroPhone, heroEnvelope, heroPaperAirplane, heroUser, heroChatBubbleLeftRight }),
   ],
   templateUrl: './contact.html',
-  styleUrl: './contact.css',
 })
 export class ContactComponent {
   sectionTitle = 'Contact';

@@ -3,33 +3,36 @@ import { CommonModule } from '@angular/common';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroArrowTopRightOnSquare } from '@ng-icons/heroicons/outline';
 import { heroCodeBracket } from '@ng-icons/heroicons/outline';
-import { DataService } from '../../services/data';
-
-export interface Project {
-  title: string;
-  description: string;
-  image: string;
-  github: string;
-  live: string;
-  tech: string[];
-}
+import { Project, ProjectService } from './projects.service';
+import { LoaderComponent } from '../../components/loader/loader';
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule, NgIconComponent],
+  imports: [CommonModule, NgIconComponent, LoaderComponent],
   providers: [provideIcons({ heroArrowTopRightOnSquare, heroCodeBracket })],
   templateUrl: './projects.html',
-  styleUrl: './projects.css',
 })
 export class ProjectsComponent implements AfterViewInit {
   @ViewChild('sectionRef') sectionRef!: ElementRef;
-  projects = signal<any[]>([]);
-  private dataService = inject(DataService);
+  projects = signal<Project[]>([]);
+  private projectService = inject(ProjectService);
+  loading = signal(true);
 
   ngOnInit() {
-    this.dataService.getProjects().subscribe((data) => {
-      this.projects.set(data);
+    // 🔥 only show loader if no cached data
+    if (!this.projects()) {
+      this.loading.set(true);
+    }
+
+    this.projectService.getProjects().subscribe({
+      next: (data) => {
+        this.projects.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+      },
     });
   }
   inView = signal(false);

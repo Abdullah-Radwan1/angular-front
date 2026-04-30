@@ -1,4 +1,12 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  OnInit,
+  signal,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
@@ -7,6 +15,9 @@ import {
   heroCalendarDays,
   heroCheckCircle,
 } from '@ng-icons/heroicons/outline';
+
+import { ExperienceService } from './experience.service';
+import { LoaderComponent } from '../../components/loader/loader';
 
 export interface ExperienceItem {
   role: string;
@@ -20,31 +31,51 @@ export interface ExperienceItem {
 @Component({
   selector: 'app-experience',
   standalone: true,
-  imports: [CommonModule, NgIconComponent],
-  providers: [provideIcons({ heroBriefcase, heroMapPin, heroCalendarDays, heroCheckCircle })],
+  imports: [CommonModule, NgIconComponent, LoaderComponent],
+  providers: [
+    provideIcons({
+      heroBriefcase,
+      heroMapPin,
+      heroCalendarDays,
+      heroCheckCircle,
+    }),
+  ],
   templateUrl: './experience.html',
-  styleUrl: './experience.css',
 })
-export class ExperienceComponent implements AfterViewInit {
-  @ViewChild('sectionRef') sectionRef!: ElementRef;
+export class ExperienceComponent implements AfterViewInit, OnInit {
+  @ViewChild('sectionRef', { static: true }) sectionRef!: ElementRef;
+
+  private experiencesService = inject(ExperienceService);
+
+  /* ================= STATE ================= */
+
+  experiences = signal<ExperienceItem[] | null>(null);
+  loading = signal(true);
+  error = signal(false);
+
   inView = signal(false);
 
   sectionTitle = 'Experience';
   sectionHeading = 'My Journey';
 
-  experiences: ExperienceItem[] = [
-    {
-      role: 'Full-Stack Web Developer',
-      company: 'National Telecommunication Institute',
-      location: 'Egypt',
-      period: 'March 2026 – Present',
-      current: true,
-      bullets: [
-        'Built and deployed full-stack web applications using the MEAN stack, developing scalable Node.js APIs and dynamic Angular interfaces.',
-        'Designed MongoDB schemas, implemented secure RESTful APIs with authentication and validation, improving data handling efficiency and application performance.',
-      ],
-    },
-  ];
+  /* ================= LIFECYCLE ================= */
+
+  ngOnInit() {
+    // 🔥 only show loader if no cached data
+    if (!this.experiences()) {
+      this.loading.set(true);
+    }
+
+    this.experiencesService.getExperiences().subscribe({
+      next: (data) => {
+        this.experiences.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+      },
+    });
+  }
 
   ngAfterViewInit() {
     const observer = new IntersectionObserver(
@@ -56,6 +87,7 @@ export class ExperienceComponent implements AfterViewInit {
       },
       { threshold: 0.15 },
     );
+
     observer.observe(this.sectionRef.nativeElement);
   }
 
