@@ -1,12 +1,13 @@
 import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AsyncPipe } from '@angular/common';
-import { Observable, tap, catchError, of, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+
 import { ProjectService, Project } from '../features/projects/projects.service';
 import { SkillsService, Skill } from '../features/skills/skills.service';
 import { ExperienceService, ExperienceItem } from '../features/experience/experience.service';
 
-// Feature Components
+// Components
 import { ProjectsTableComponent } from './projects/projects-table.component';
 import { ProjectsFormModalComponent } from './projects/projects-form-modal.component';
 import { SkillsTableComponent } from './skills/skills-table.component';
@@ -14,14 +15,8 @@ import { SkillsFormModalComponent } from './skills/skills-form-modal.component';
 import { ExperienceTableComponent } from './experience/experience-table.component';
 import { ExperienceFormModalComponent } from './experience/experience-form-modal.component';
 import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
-export type CreateExperienceDto = {
-  role: string;
-  company: string;
-  location: string;
-  period: string;
-  current: boolean;
-  bullets?: string[];
-};
+import { TitlesSettingsComponent } from './titles/titles-settings.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -35,6 +30,7 @@ export type CreateExperienceDto = {
     ExperienceTableComponent,
     ExperienceFormModalComponent,
     ConfirmDialogComponent,
+    TitlesSettingsComponent,
   ],
   templateUrl: './dashboard.component.html',
 })
@@ -45,12 +41,12 @@ export class DashboardComponent implements OnInit {
   private skillsService = inject(SkillsService);
   private experienceService = inject(ExperienceService);
 
-  // State
-  activeTab = 'projects';
+  // UI State
+  activeTab: 'projects' | 'skills' | 'experience' | 'title' = 'projects';
   messageText = '';
   messageType: 'success' | 'error' = 'success';
 
-  // Data Observables
+  // Data
   projects$ = new BehaviorSubject<Project[]>([]);
   skills$ = new BehaviorSubject<Skill[]>([]);
   experiences$ = new BehaviorSubject<ExperienceItem[]>([]);
@@ -60,7 +56,7 @@ export class DashboardComponent implements OnInit {
   isSkillModalVisible = false;
   isExperienceModalVisible = false;
 
-  // Edit States
+  // Editing
   editingProject: Project | null = null;
   editingSkill: Skill | null = null;
   editingExperience: ExperienceItem | null = null;
@@ -77,31 +73,31 @@ export class DashboardComponent implements OnInit {
 
   private loadProjects() {
     this.projectService.getProjects().subscribe({
-      next: (projects) => this.projects$.next(projects),
+      next: (data) => this.projects$.next(data),
       error: () => this.setMessage('Failed to load projects', 'error'),
     });
   }
 
   private loadSkills() {
     this.skillsService.getSkills().subscribe({
-      next: (skills) => this.skills$.next(skills),
+      next: (data) => this.skills$.next(data),
       error: () => this.setMessage('Failed to load skills', 'error'),
     });
   }
 
   private loadExperiences() {
     this.experienceService.getExperiences().subscribe({
-      next: (experiences) => this.experiences$.next(experiences),
+      next: (data) => this.experiences$.next(data),
       error: () => this.setMessage('Failed to load experiences', 'error'),
     });
   }
 
-  // Tab Management
-  setActiveTab(tab: string) {
+  setActiveTab(tab: typeof this.activeTab) {
     this.activeTab = tab;
   }
 
-  // Projects Handlers
+  // ================= PROJECTS =================
+
   onAddProject() {
     this.editingProject = null;
     this.isProjectModalVisible = true;
@@ -115,7 +111,7 @@ export class DashboardComponent implements OnInit {
   async onDeleteProject(project: Project) {
     const confirmed = await this.confirmDialog.open({
       title: 'Delete Project',
-      message: `Are you sure you want to delete "${project.title}"?`,
+      message: `Delete "${project.title}"?`,
       confirmText: 'Delete',
       cancelText: 'Cancel',
     });
@@ -123,28 +119,27 @@ export class DashboardComponent implements OnInit {
     if (confirmed && project._id) {
       this.projectService.deleteProject(project._id).subscribe({
         next: () => {
-          this.setMessage('Project deleted successfully');
+          this.setMessage('Project deleted');
           this.loadProjects();
         },
-        error: () => this.setMessage('Failed to delete project', 'error'),
+        error: () => this.setMessage('Delete failed', 'error'),
       });
     }
   }
 
-  onSaveProject(projectData: Partial<Project>) {
+  onSaveProject(data: Partial<Project>) {
     const operation = this.editingProject
       ? //@ts-ignore
-        this.projectService.updateProject(this.editingProject._id!, projectData)
-      : //@ts-ignore
-        this.projectService.createProject(projectData);
+        this.projectService.updateProject(this.editingProject._id!, data)
+      : this.projectService.createProject(data as Project);
 
     operation.subscribe({
       next: () => {
-        this.setMessage(`Project ${this.editingProject ? 'updated' : 'created'} successfully`);
-        this.onCloseExperienceModal();
+        this.setMessage('Project saved');
+        this.onCloseProjectModal();
         this.loadProjects();
       },
-      error: () => this.setMessage('Failed to save project', 'error'),
+      error: () => this.setMessage('Save failed', 'error'),
     });
   }
 
@@ -153,7 +148,8 @@ export class DashboardComponent implements OnInit {
     this.editingProject = null;
   }
 
-  // Skills Handlers
+  // ================= SKILLS =================
+
   onAddSkill() {
     this.editingSkill = null;
     this.isSkillModalVisible = true;
@@ -167,7 +163,7 @@ export class DashboardComponent implements OnInit {
   async onDeleteSkill(skill: Skill) {
     const confirmed = await this.confirmDialog.open({
       title: 'Delete Skill',
-      message: `Are you sure you want to delete "${skill.name}"?`,
+      message: `Delete "${skill.name}"?`,
       confirmText: 'Delete',
       cancelText: 'Cancel',
     });
@@ -175,27 +171,26 @@ export class DashboardComponent implements OnInit {
     if (confirmed && skill._id) {
       this.skillsService.deleteSkill(skill._id).subscribe({
         next: () => {
-          this.setMessage('Skill deleted successfully');
+          this.setMessage('Skill deleted');
           this.loadSkills();
         },
-        error: () => this.setMessage('Failed to delete skill', 'error'),
+        error: () => this.setMessage('Delete failed', 'error'),
       });
     }
   }
 
-  onSaveSkill(skillData: Partial<Skill>) {
+  onSaveSkill(data: Partial<Skill>) {
     const operation = this.editingSkill
-      ? this.skillsService.updateSkill(this.editingSkill._id!, skillData)
-      : //@ts-ignore
-        this.skillsService.createSkill(skillData);
+      ? this.skillsService.updateSkill(this.editingSkill._id!, data)
+      : this.skillsService.createSkill(data as Skill);
 
     operation.subscribe({
       next: () => {
-        this.setMessage(`Skill ${this.editingSkill ? 'updated' : 'created'} successfully`);
+        this.setMessage('Skill saved');
         this.onCloseSkillModal();
         this.loadSkills();
       },
-      error: () => this.setMessage('Failed to save skill', 'error'),
+      error: () => this.setMessage('Save failed', 'error'),
     });
   }
 
@@ -204,51 +199,49 @@ export class DashboardComponent implements OnInit {
     this.editingSkill = null;
   }
 
-  // Experience Handlers
+  // ================= EXPERIENCE =================
+
   onAddExperience() {
     this.editingExperience = null;
     this.isExperienceModalVisible = true;
   }
 
-  onEditExperience(experience: ExperienceItem) {
-    this.editingExperience = experience;
+  onEditExperience(exp: ExperienceItem) {
+    this.editingExperience = exp;
     this.isExperienceModalVisible = true;
   }
 
-  async onDeleteExperience(experience: ExperienceItem) {
+  async onDeleteExperience(exp: ExperienceItem) {
     const confirmed = await this.confirmDialog.open({
       title: 'Delete Experience',
-      message: `Are you sure you want to delete "${experience.role} at ${experience.company}"?`,
+      message: `Delete "${exp.role} at ${exp.company}"?`,
       confirmText: 'Delete',
       cancelText: 'Cancel',
     });
 
-    if (confirmed && experience._id) {
-      this.experienceService.deleteExperience(experience._id).subscribe({
+    if (confirmed && exp._id) {
+      this.experienceService.deleteExperience(exp._id).subscribe({
         next: () => {
-          this.setMessage('Experience deleted successfully');
+          this.setMessage('Experience deleted');
           this.loadExperiences();
         },
-        error: () => this.setMessage('Failed to delete experience', 'error'),
+        error: () => this.setMessage('Delete failed', 'error'),
       });
     }
   }
 
-  onSaveExperience(experienceData: Partial<ExperienceItem>) {
+  onSaveExperience(data: Partial<ExperienceItem>) {
     const operation = this.editingExperience
-      ? this.experienceService.updateExperience(this.editingExperience._id!, experienceData)
-      : //@ts-ignore
-        this.experienceService.createExperience(createexpe);
+      ? this.experienceService.updateExperience(this.editingExperience._id!, data)
+      : this.experienceService.createExperience(data as ExperienceItem);
 
     operation.subscribe({
       next: () => {
-        this.setMessage(
-          `Experience ${this.editingExperience ? 'updated' : 'created'} successfully`,
-        );
+        this.setMessage('Experience saved');
         this.onCloseExperienceModal();
         this.loadExperiences();
       },
-      error: () => this.setMessage('Failed to save experience', 'error'),
+      error: () => this.setMessage('Save failed', 'error'),
     });
   }
 
@@ -257,11 +250,14 @@ export class DashboardComponent implements OnInit {
     this.editingExperience = null;
   }
 
-  private setMessage(message: string, type: 'success' | 'error' = 'success') {
-    this.messageText = message;
+  // ================= UTIL =================
+
+  private setMessage(msg: string, type: 'success' | 'error' = 'success') {
+    this.messageText = msg;
     this.messageType = type;
+
     setTimeout(() => {
-      if (this.messageText === message) this.messageText = '';
+      if (this.messageText === msg) this.messageText = '';
     }, 3000);
   }
 }
