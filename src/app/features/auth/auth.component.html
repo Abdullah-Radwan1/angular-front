@@ -1,0 +1,138 @@
+<div class="min-h-screen flex items-center justify-center bg-base-200 px-4 font-tajawal">
+  <div class="absolute top-10 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl"></div>
+  <div class="absolute bottom-10 right-10 w-40 h-40 bg-secondary/10 rounded-full blur-3xl"></div>
+
+  <div class="card w-full max-w-md bg-base-100 shadow-2xl border border-base-300">
+    <div class="card-body p-8">
+      <div class="flex flex-col items-center gap-2 mb-8">
+        <div class="p-3 bg-primary/10 rounded-2xl text-primary">
+          <svg lucidePackage [size]="32"></svg>
+        </div>
+        <h2 class="text-3xl font-black tracking-tight text-base-content">
+          {{ isLoginMode() ? 'Welcome Back' : 'Join Luxury Home' }}
+        </h2>
+        <p class="text-sm text-base-content/60">
+          {{
+            isLoginMode()
+              ? 'Enter your credentials to access your account'
+              : 'Start your journey into elegance today'
+          }}
+        </p>
+      </div>
+
+      <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        @if (!isLoginMode()) {
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label pb-1"
+                ><span class="label-text font-bold text-xs uppercase opacity-60"
+                  >First Name</span
+                ></label
+              >
+              <div class="relative">
+                <span class="absolute inset-y-0 left-3 flex items-center opacity-40"
+                  ><svg lucideUser [size]="16"></svg
+                ></span>
+                <input
+                  type="text"
+                  formControlName="firstName"
+                  class="input input-bordered w-full focus:input-primary"
+                  placeholder="John"
+                />
+              </div>
+            </div>
+            <div class="form-control">
+              <label class="label pb-1"
+                ><span class="label-text font-bold text-xs uppercase opacity-60"
+                  >Last Name</span
+                ></label
+              >
+              <input
+                type="text"
+                formControlName="lastName"
+                class="input input-bordered w-full focus:input-primary"
+                placeholder="Doe"
+              />
+            </div>
+          </div>
+        }
+
+        <div class="form-control">
+          <label class="label pb-1"
+            ><span class="label-text font-bold text-xs uppercase opacity-60"
+              >Email Address</span
+            ></label
+          >
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3 flex items-center opacity-40"
+              ><svg lucideMail [size]="16"></svg
+            ></span>
+            <input
+              type="email"
+              formControlName="email"
+              class="input input-bordered w-full focus:input-primary"
+              placeholder="name@example.com"
+            />
+          </div>
+        </div>
+
+        <div class="form-control">
+          <div class="flex justify-between items-center">
+            <label class="label pb-1"
+              ><span class="label-text font-bold text-xs uppercase opacity-60"
+                >Password</span
+              ></label
+            >
+            @if (isLoginMode()) {
+              <a href="#" class="text-[10px] uppercase font-bold text-primary hover:underline"
+                >Forgot?</a
+              >
+            }
+          </div>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-3 flex items-center opacity-40"
+              ><svg lucideLock [size]="16"></svg
+            ></span>
+            <input
+              type="password"
+              formControlName="password"
+              class="input input-bordered w-full focus:input-primary"
+              placeholder="••••••••"
+            />
+          </div>
+        </div>
+
+        <div class="form-control flex justify-center mt-8">
+          <button
+            type="submit"
+            class="btn btn-primary shadow-lg shadow-primary/20 gap-2 h-12 text-lg"
+            [disabled]="authForm.invalid || isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="loading loading-spinner loading-sm"></span>
+            } @else {
+              @if (isLoginMode()) {
+                <svg lucideLogIn [size]="18"></svg>
+              } @else {
+                <svg lucideUserPlus [size]="18"></svg>
+              }
+            }
+            {{ isLoginMode() ? 'Sign In' : 'Create Account' }}
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-8 text-center">
+        <p class="text-sm text-base-content/60 mb-4">
+          {{ isLoginMode() ? "Don't have an account yet?" : 'Already a member of our collection?' }}
+        </p>
+        <button
+          class="btn btn-ghost btn-sm text-primary font-bold hover:bg-primary/5 uppercase tracking-widest text-xs"
+          (click)="toggleMode()"
+        >
+          {{ isLoginMode() ? 'Register Now' : 'Go to Login' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

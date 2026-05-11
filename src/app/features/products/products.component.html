@@ -1,0 +1,195 @@
+<div class="container mx-auto px-4 py-12">
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+    <div class="max-w-xl">
+      <h1 class="text-5xl font-black mb-4">Gallery</h1>
+      <p class="text-base-content/50 font-medium leading-relaxed">
+        Explore our curated collection of minimalist designs and essential pieces for your modern
+        living space.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs font-black uppercase tracking-widest opacity-30">Sort By</span>
+      <div class="dropdown dropdown-end">
+        <label tabindex="0" class="btn btn-ghost btn-sm rounded-xl border border-base-200 px-4">
+          <span class="font-black">{{
+            sort() === '-createdAt'
+              ? 'Newest'
+              : sort() === 'price'
+                ? 'Price: Low-High'
+                : 'Price: High-Low'
+          }}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </label>
+        <ul
+          tabindex="0"
+          class="dropdown-content z-[1] menu p-2 shadow-2xl bg-base-100 rounded-2xl w-52 mt-2 border border-base-200"
+        >
+          <li><a (click)="changeSort('-createdAt')" class="font-bold">Newest First</a></li>
+          <li><a (click)="changeSort('price')" class="font-bold">Price: Low-High</a></li>
+          <li><a (click)="changeSort('-price')" class="font-bold">Price: High-Low</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-12">
+    <!-- Sidebar Filters -->
+    <aside class="w-full lg:w-72 shrink-0">
+      <div class="sticky top-24 space-y-10">
+        <form [formGroup]="filterForm" class="space-y-10">
+          <!-- Search -->
+          <div class="relative group">
+            <span class="absolute inset-y-0 left-4 flex items-center opacity-30 group-focus-within:opacity-100 transition-opacity">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </span>
+            <input
+              type="text"
+              formControlName="search"
+              placeholder="Search pieces..."
+              class="input input-bordered w-full pl-12 rounded-2xl bg-base-200/50 border-transparent focus:bg-base-100 focus:border-primary font-bold transition-all h-14"
+            />
+          </div>
+
+          <!-- Categories -->
+          <div>
+            <h3 class="text-xs font-black uppercase tracking-widest opacity-30 mb-6">Collections</h3>
+            <div class="flex flex-col gap-2">
+              <label class="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="radio"
+                  formControlName="category"
+                  value=""
+                  class="radio radio-primary radio-sm border-2"
+                />
+                <span class="font-bold text-sm group-hover:text-primary transition-colors">All Collections</span>
+              </label>
+              @for (category of categories(); track category._id) {
+                <label class="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="radio"
+                    formControlName="category"
+                    [value]="category._id"
+                    class="radio radio-primary radio-sm border-2"
+                  />
+                  <span class="font-bold text-sm group-hover:text-primary transition-colors">{{ category.name }}</span>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Price Range -->
+          <div>
+            <h3 class="text-xs font-black uppercase tracking-widest opacity-30 mb-6">Price Range</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1">
+                <span class="text-[10px] font-black opacity-30 uppercase ml-1">Min</span>
+                <input
+                  type="number"
+                  formControlName="minPrice"
+                  placeholder="0"
+                  class="input input-bordered input-sm w-full rounded-xl font-bold border-2"
+                />
+              </div>
+              <div class="space-y-1">
+                <span class="text-[10px] font-black opacity-30 uppercase ml-1">Max</span>
+                <input
+                  type="number"
+                  formControlName="maxPrice"
+                  placeholder="∞"
+                  class="input input-bordered input-sm w-full rounded-xl font-bold border-2"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Clear Filters -->
+          <button
+            type="button"
+            (click)="filterForm.reset({category: '', search: '', minPrice: '', maxPrice: ''})"
+            class="btn btn-ghost btn-block btn-sm rounded-xl text-error font-black uppercase tracking-tighter opacity-50 hover:opacity-100"
+          >
+            Reset Filters
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Product Grid -->
+    <main class="flex-1">
+      @if (isLoading()) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <div class="flex flex-col gap-4">
+              <div class="aspect-3/4 skeleton w-full rounded-[2rem]"></div>
+              <div class="skeleton h-6 w-2/3 rounded-full"></div>
+              <div class="skeleton h-4 w-full rounded-full"></div>
+            </div>
+          }
+        </div>
+      } @else if (products().length > 0) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+          @for (product of products(); track product._id) {
+            <app-product-card [product]="product" class="animate-fade-in" />
+          }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="flex justify-center mt-20">
+            <div class="join bg-base-200 p-1 rounded-2xl">
+              <button
+                class="join-item btn btn-ghost btn-md rounded-xl"
+                [disabled]="currentPage() === 1"
+                (click)="changePage(currentPage() - 1)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+
+              @for (page of pages(); track page) {
+                <button
+                  class="join-item btn btn-md rounded-xl px-6 font-black"
+                  [class.btn-primary]="page === currentPage()"
+                  [class.btn-ghost]="page !== currentPage()"
+                  (click)="changePage(page)"
+                >
+                  {{ page }}
+                </button>
+              }
+
+              <button
+                class="join-item btn btn-ghost btn-md rounded-xl"
+                [disabled]="currentPage() === totalPages()"
+                (click)="changePage(currentPage() + 1)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+        }
+      } @else {
+        <div class="flex flex-col items-center justify-center py-32 text-center">
+          <div class="p-10 bg-base-200 rounded-[3rem] mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-20"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg>
+          </div>
+          <h3 class="text-2xl font-black mb-2">No pieces found</h3>
+          <p class="text-base-content/50 max-w-xs">
+            Try adjusting your filters or search terms to find what you're looking for.
+          </p>
+        </div>
+      }
+    </main>
+  </div>
+</div>

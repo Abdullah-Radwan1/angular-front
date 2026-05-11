@@ -1,0 +1,120 @@
+<div
+  class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 w-full max-w-xs group"
+  [class.opacity-75]="!isInStock"
+>
+  <figure class="relative aspect-3/4 overflow-hidden bg-base-200">
+    @if (!imageLoaded) {
+      <div class="skeleton absolute inset-0 w-full h-full rounded-none"></div>
+    }
+
+    <img
+      [src]="product.imageUrl"
+      [alt]="productName"
+      class="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+      [class.opacity-0]="!imageLoaded"
+      (load)="onImageLoad()"
+    />
+
+    <div class="absolute bottom-3 left-3 flex flex-col gap-1">
+      @if (!isInStock) {
+        <div class="badge badge-error badge-sm font-semibold">Out of Stock</div>
+      }
+      @if (isInStock && totalStock <= 5) {
+        <div class="badge badge-warning badge-sm font-semibold">Low Stock</div>
+      }
+    </div>
+  </figure>
+
+  <div class="card-body p-4 gap-3">
+    <div class="flex items-start justify-between gap-2">
+      <h2 class="card-title text-sm font-bold leading-snug line-clamp-2 flex-1">
+        {{ productName }}
+      </h2>
+      <div class="text-right shrink-0">
+        <span class="text-base font-extrabold text-primary">
+          {{ product.price | number: '1.0-0' }}
+        </span>
+        <span class="text-xs text-base-content/50 ms-1">EGP</span>
+      </div>
+    </div>
+
+    @if (productDescription) {
+      <p class="text-xs text-base-content/60 line-clamp-2 leading-relaxed italic">
+        {{ productDescription }}
+      </p>
+    }
+
+    @if (product.variants?.length) {
+      <div class="flex flex-col gap-1.5">
+        <span class="text-[10px] font-black uppercase tracking-widest text-base-content/30"
+          >Color</span
+        >
+        <div class="flex flex-wrap gap-2">
+          @for (variant of product.variants; track variant.color) {
+            <button
+              class="w-5 h-5 rounded-full border-2 transition-transform duration-200 hover:scale-110"
+              [style.background]="variant.color"
+              [disabled]="variant.stock === 0"
+              [class.opacity-30]="variant.stock === 0"
+              [class.border-base-content]="selectedColor === variant.color"
+              [class.scale-110]="selectedColor === variant.color"
+              [class.border-transparent]="selectedColor !== variant.color"
+              (click)="selectColor(variant.color)"
+            ></button>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="card-actions mt-2 flex flex-col gap-2">
+      <button
+        class="btn btn-neutral btn-sm w-full gap-2 rounded-xl"
+        [disabled]="!isInStock || isAdding"
+        (click)="addToCart()"
+      >
+        @if (isAdding) {
+          <span class="loading loading-spinner loading-xs"></span>
+        } @else {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="8" cy="21" r="1" />
+            <circle cx="19" cy="21" r="1" />
+            <path
+              d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12"
+            />
+          </svg>
+          Add to Cart
+        }
+      </button>
+
+      <a
+        [routerLink]="['/product', product.slug]"
+        class="btn btn-ghost btn-xs w-full text-base-content/50 hover:text-primary transition-colors font-bold uppercase tracking-tighter"
+      >
+        View Details
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M5 12h14m-7-7 7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</div>

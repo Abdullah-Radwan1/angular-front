@@ -1,0 +1,248 @@
+<div class="container mx-auto px-4 py-12">
+  @if (product(); as product) {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-20">
+      <!-- Image Gallery -->
+      <div class="space-y-4">
+        <div
+          class="aspect-square rounded-3xl overflow-hidden bg-base-200 border border-base-200 group"
+        >
+          <img
+            [src]="product.imageUrl"
+            [alt]="product.name"
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="flex flex-col">
+        <div class="mb-6">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="badge badge-outline badge-sm opacity-50">{{
+              product.category || 'Collection'
+            }}</span>
+            @if (getTotalStock(product) === 0) {
+              <span class="badge badge-error badge-sm">Out of Stock</span>
+            } @else if (getTotalStock(product) <= 3) {
+              <span class="badge badge-warning badge-sm">Low Stock</span>
+            } @else {
+              <span class="badge badge-success badge-sm">In Stock</span>
+            }
+          </div>
+          <h1 class="text-4xl lg:text-5xl font-black mb-4">{{ product.name }}</h1>
+          <div class="flex items-baseline gap-2 mb-6">
+            <span class="text-3xl font-black text-primary">{{ product.price | number }}</span>
+            <span class="text-sm font-bold opacity-50">EGP</span>
+          </div>
+          <p class="text-base-content/70 leading-relaxed text-lg italic max-w-xl">
+            {{ product.description }}
+          </p>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Options -->
+        <div class="space-y-8 mb-10">
+          @if (product.variants?.length) {
+            <div>
+              <span class="text-xs font-black uppercase tracking-widest opacity-40 block mb-4"
+                >Select Color</span
+              >
+              <div class="flex flex-wrap gap-4">
+                @for (variant of product.variants; track variant.color) {
+                  <button
+                    class="w-10 h-10 rounded-full border-4 transition-all duration-300 hover:scale-110 relative"
+                    [style.background]="variant.color"
+                    [disabled]="variant.stock === 0"
+                    [class.opacity-20]="variant.stock === 0"
+                    [class.border-primary]="selectedColor() === variant.color"
+                    [class.border-transparent]="selectedColor() !== variant.color"
+                    [class.ring-2]="selectedColor() === variant.color"
+                    [class.ring-primary/20]="selectedColor() === variant.color"
+                    (click)="selectColor(variant.color)"
+                  >
+                    @if (selectedColor() === variant.color) {
+                      <div
+                        class="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center border-2 border-base-100"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-2 w-2 text-primary-content"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Add to Cart Form -->
+          <div class="card bg-base-200/50 p-6 rounded-[2rem] border border-base-200">
+            @if (getTotalStock(product) > 0 && authStore.isAuthenticated()) {
+              <form [formGroup]="cartForm" (ngSubmit)="addToCart()" class="flex flex-col gap-6">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-bold opacity-60">Quantity</span>
+                  <div class="flex items-center bg-base-100 rounded-2xl p-1 border border-base-200">
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm btn-square"
+                      (click)="cartForm.patchValue({ quantity: cartForm.value.quantity - 1 })"
+                      [disabled]="cartForm.value.quantity <= 1"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M5 12h14" />
+                      </svg>
+                    </button>
+                    <input
+                      type="number"
+                      formControlName="quantity"
+                      class="w-12 text-center bg-transparent border-none font-black text-lg focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      readonly
+                    />
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm btn-square"
+                      (click)="cartForm.patchValue({ quantity: cartForm.value.quantity + 1 })"
+                      [disabled]="cartForm.value.quantity >= getTotalStock(product)"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-lg rounded-2xl h-16 text-lg font-black shadow-lg shadow-primary/20 group"
+                  [disabled]="cartForm.invalid || isAdding()"
+                >
+                  @if (isAdding()) {
+                    <span class="loading loading-spinner"></span>
+                  } @else {
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="mr-2"
+                    >
+                      <circle cx="8" cy="21" r="1" />
+                      <circle cx="19" cy="21" r="1" />
+                      <path
+                        d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12"
+                      />
+                    </svg>
+                    Add to Collection
+                  }
+                </button>
+              </form>
+            } @else if (!authStore.isAuthenticated()) {
+              <div class="text-center space-y-4">
+                <p class="text-base-content/50 font-medium">Log in to add this item to your cart</p>
+                <button routerLink="/login" class="btn btn-outline btn-wide rounded-2xl">
+                  Sign In
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Products -->
+    @if (relatedProducts().length > 0) {
+      <div class="space-y-10">
+        <div class="flex items-baseline justify-between border-b border-base-200 pb-6">
+          <div>
+            <h2 class="text-3xl font-black">Related Pieces</h2>
+            <p class="text-sm font-bold opacity-40 uppercase tracking-widest mt-1">
+              From the same collection
+            </p>
+          </div>
+          <a
+            routerLink="/products"
+            class="text-sm font-black text-primary hover:underline uppercase tracking-tighter"
+            >View All</a
+          >
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          @for (rel of relatedProducts(); track rel._id) {
+            <app-product-card [product]="rel"></app-product-card>
+          }
+        </div>
+      </div>
+    }
+  } @else if (isLoading()) {
+    <div class="flex flex-col justify-center items-center h-[70vh] gap-6">
+      <div class="loading loading-spinner loading-lg text-primary"></div>
+      <p class="font-black animate-pulse opacity-40 uppercase tracking-widest text-xs">
+        Curating the details...
+      </p>
+    </div>
+  } @else {
+    <div class="flex flex-col justify-center items-center h-[70vh] text-center gap-6">
+      <div class="p-8 bg-base-200 rounded-[3rem]">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          class="opacity-20"
+        >
+          <path
+            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+          />
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+          <line x1="12" y1="22.08" x2="12" y2="12" />
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-3xl font-black mb-2">Piece Not Found</h2>
+        <p class="text-base-content/50 max-w-xs">
+          The product you are looking for might have been moved or is no longer available.
+        </p>
+      </div>
+      <button routerLink="/products" class="btn btn-primary rounded-2xl px-10">
+        Back to Gallery
+      </button>
+    </div>
+  }
+</div>

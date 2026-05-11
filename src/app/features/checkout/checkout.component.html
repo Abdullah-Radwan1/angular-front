@@ -1,0 +1,216 @@
+<div class="container mx-auto px-4 py-12 max-w-6xl">
+  <div class="flex flex-col lg:flex-row gap-12">
+    <!-- Main Checkout Form -->
+    <div class="flex-1">
+      <div class="mb-10">
+        <h1 class="text-5xl font-black mb-4">Checkout</h1>
+        <p class="text-base-content/50 font-medium">
+          Complete your order by providing your shipping and payment details.
+        </p>
+      </div>
+
+      <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()" class="space-y-12">
+        <!-- Shipping Section -->
+        <section>
+          <div class="flex items-center gap-4 mb-8">
+            <div
+              class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black"
+            >
+              1
+            </div>
+            <h2 class="text-2xl font-black">Shipping Address</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-control md:col-span-2">
+              <label class="label"
+                ><span class="label-text font-bold opacity-60">Street Address</span></label
+              >
+              <input
+                type="text"
+                formControlName="street"
+                class="input input-bordered rounded-2xl h-14 font-bold border-2"
+                placeholder="123 Gallery St."
+              />
+            </div>
+
+            <div class="form-control">
+              <label class="label"><span class="label-text font-bold opacity-60">City</span></label>
+              <input
+                type="text"
+                formControlName="city"
+                class="input input-bordered rounded-2xl h-14 font-bold border-2"
+                placeholder="Cairo"
+              />
+            </div>
+
+            <div class="form-control">
+              <label class="label"
+                ><span class="label-text font-bold opacity-60">State / Province</span></label
+              >
+              <input
+                type="text"
+                formControlName="state"
+                class="input input-bordered rounded-2xl h-14 font-bold border-2"
+                placeholder="Cairo Gov."
+              />
+            </div>
+
+            <div class="form-control">
+              <label class="label"
+                ><span class="label-text font-bold opacity-60">ZIP Code</span></label
+              >
+              <input
+                type="text"
+                formControlName="zipCode"
+                class="input input-bordered rounded-2xl h-14 font-bold border-2"
+                placeholder="11221"
+              />
+            </div>
+
+            <div class="form-control">
+              <label class="label"
+                ><span class="label-text font-bold opacity-60">Country</span></label
+              >
+              <input
+                type="text"
+                formControlName="country"
+                class="input input-bordered rounded-2xl h-14 font-bold border-2"
+                placeholder="Egypt"
+              />
+            </div>
+          </div>
+        </section>
+
+        <!-- Payment Section -->
+        <section>
+          <div class="flex items-center gap-4 mb-8">
+            <div
+              class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black"
+            >
+              2
+            </div>
+            <h2 class="text-2xl font-black">Payment Method</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <label
+              class="card bg-base-200 p-6 rounded-[2rem] border-2 cursor-pointer transition-all"
+              [class.border-primary]="checkoutForm.value.paymentMethod === 'cod'"
+              [class.border-transparent]="checkoutForm.value.paymentMethod !== 'cod'"
+            >
+              <input type="radio" formControlName="paymentMethod" value="cod" class="hidden" />
+              <div class="flex flex-col items-center gap-3 text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="opacity-40"
+                >
+                  <rect width="20" height="12" x="2" y="6" rx="2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <path d="M6 12h.01M18 12h.01" />
+                </svg>
+                <span class="font-black">Cash on Delivery</span>
+              </div>
+            </label>
+
+            <label
+              class="card bg-base-200 p-6 rounded-[2rem] border-2 cursor-pointer transition-all opacity-50 grayscale pointer-events-none"
+            >
+              <div class="flex flex-col items-center gap-3 text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="opacity-40"
+                >
+                  <rect width="20" height="14" x="2" y="5" rx="2" />
+                  <line x1="2" x2="22" y1="10" y2="10" />
+                </svg>
+                <span class="font-black">Credit Card</span>
+              </div>
+            </label>
+
+            <label
+              class="card bg-base-200 p-6 rounded-[2rem] border-2 cursor-pointer transition-all opacity-50 grayscale pointer-events-none"
+            >
+              <div class="flex flex-col items-center gap-3 text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="opacity-40"
+                >
+                  <path d="M7 10v4a5 5 0 0 1-10 0v-4" />
+                  <path d="M2 10v4a5 5 0 0 0 10 0v-4" />
+                  <path d="M7 19V5" />
+                </svg>
+                <span class="font-black">PayPal</span>
+              </div>
+            </label>
+          </div>
+        </section>
+      </form>
+    </div>
+
+    <!-- Order Summary Sidebar -->
+    <aside class="w-full lg:w-96">
+      <div class="card bg-base-200 p-8 rounded-[3rem] sticky top-24">
+        <h2 class="text-2xl font-black mb-8">Summary</h2>
+
+        <div class="space-y-6 mb-10">
+          <div class="flex justify-between items-center">
+            <span class="font-bold opacity-40">Subtotal</span>
+            <span class="font-black">{{ cartStore.totalPrice() | number }} EGP</span>
+          </div>
+          <div class="flex justify-between items-center text-success">
+            <span class="font-bold">Shipping</span>
+            <span class="font-black uppercase text-xs">Free</span>
+          </div>
+          <div class="divider"></div>
+          <div class="flex justify-between items-center">
+            <span class="text-xl font-black">Total</span>
+            <span class="text-2xl font-black text-primary"
+              >{{ cartStore.totalPrice() | number }} EGP</span
+            >
+          </div>
+        </div>
+
+        <button
+          (click)="onSubmit()"
+          class="btn btn-primary btn-lg w-full rounded-2xl h-16 text-lg font-black shadow-xl shadow-primary/20"
+          [disabled]="checkoutForm.invalid || isLoading() || cartStore.totalItems() === 0"
+        >
+          @if (isLoading()) {
+            <span class="loading loading-spinner"></span>
+          } @else {
+            Confirm Order
+          }
+        </button>
+
+        <p class="text-[10px] text-center mt-6 font-bold opacity-30 uppercase tracking-widest px-4">
+          By confirming, you agree to our terms of service and return policy.
+        </p>
+      </div>
+    </aside>
+  </div>
+</div>

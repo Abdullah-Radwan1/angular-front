@@ -1,0 +1,48 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-4xl font-bold mb-8">Manage Users</h1>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user._id) {
+          <tr>
+            <td>{{ user._id }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.name }}</td>
+            <td>
+              <span
+                class="badge"
+                [ngClass]="user.role === 'admin' ? 'badge-warning' : 'badge-info'"
+              >
+                {{ user.role }}
+              </span>
+            </td>
+            <td>
+              <span class="badge badge-success"> Active </span>
+            </td>
+            <td>{{ user.createdAt | date: 'short' }}</td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn btn-sm btn-outline" (click)="toggleUserStatus(user)">
+                  Deactivate
+                </button>
+                <button class="btn btn-sm btn-error" (click)="deleteUser(user)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

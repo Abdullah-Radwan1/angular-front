@@ -1,0 +1,159 @@
+<div class="container mx-auto px-4 py-10 font-tajawal">
+  <div class="flex items-center justify-between mb-10 border-b border-base-200 pb-6">
+    <div class="flex items-center gap-3">
+      <div class="p-3 bg-primary/10 rounded-2xl text-primary">
+        <svg lucideShoppingCart [size]="28"></svg>
+      </div>
+      <div>
+        <h1 class="text-3xl font-black tracking-tight">Your Cart</h1>
+        <p class="text-xs font-bold opacity-50 uppercase tracking-widest">
+          {{ cartStore.totalItems() }} Items Selected
+        </p>
+      </div>
+    </div>
+
+    @if (cartStore.cart().length > 0) {
+      <button
+        class="btn btn-ghost btn-sm text-error/60 hover:text-error font-bold"
+        (click)="clear()"
+      >
+        <svg lucideTrash2 [size]="16" class="mr-2"></svg>
+        Clear All
+      </button>
+    }
+  </div>
+
+  @if (cartStore.cart().length > 0) {
+    <div class="grid gap-6">
+      @for (item of cartStore.cart(); track item.product._id) {
+        <div
+          class="card bg-base-100 border border-base-200 shadow-sm p-5 flex flex-col md:flex-row items-center gap-6 transition-all hover:shadow-lg hover:border-primary/20 group"
+        >
+          <div class="relative overflow-hidden rounded-2xl">
+            <img
+              [src]="item.product.imageUrl"
+              [alt]="item.product.name"
+              class="w-32 h-32 object-cover shadow-sm bg-base-200 transition-transform duration-500 group-hover:scale-110"
+            />
+          </div>
+
+          <div class="flex-1 w-full text-center md:text-left">
+            <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <div class="space-y-1">
+                <h2
+                  class="font-bold text-xl leading-tight text-base-content group-hover:text-primary transition-colors"
+                >
+                  {{ item.product.name }}
+                </h2>
+                <p class="text-sm text-base-content/60 line-clamp-2 max-w-md italic">
+                  {{ item.product.description }}
+                </p>
+                <div class="pt-2">
+                  <span
+                    class="badge badge-ghost badge-xs opacity-40 font-mono tracking-tighter uppercase"
+                    >Ref: {{ item.product._id.slice(-8) }}</span
+                  >
+                </div>
+              </div>
+
+              <div
+                class="flex flex-col items-center md:items-end bg-base-200/50 p-3 rounded-2xl min-w-[120px]"
+              >
+                <div class="text-primary font-black text-xl flex items-baseline gap-1">
+                  {{ item.priceAtAdd }}
+                  <span class="text-[10px] opacity-60">EGP</span>
+                </div>
+
+                @if (item.isPriceChanged) {
+                  <div
+                    class="flex items-center gap-1 text-warning text-[10px] font-bold uppercase tracking-tighter mt-1 bg-warning/10 px-2 py-0.5 rounded-full"
+                  >
+                    <svg lucideAlertCircle [size]="10"></svg>
+                    Updated
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center bg-base-200 rounded-2xl p-1.5 gap-1 border border-base-300">
+            <button
+              class="btn btn-ghost btn-sm btn-square hover:bg-base-100"
+              (click)="decrease(item.product._id, item.quantity)"
+            >
+              <svg lucideMinus [size]="16" class="text-base-content/70"></svg>
+            </button>
+
+            <span class="w-10 text-center font-black text-lg">
+              {{ item.quantity }}
+            </span>
+
+            <button
+              class="btn btn-ghost btn-sm btn-square hover:bg-base-100 text-primary"
+              (click)="increase(item.product._id)"
+            >
+              <svg lucidePlus [size]="16"></svg>
+            </button>
+          </div>
+
+          <button
+            class="btn btn-ghost btn-circle text-error/30 hover:text-error hover:bg-error/10 transition-all"
+            (click)="remove(item.product._id)"
+          >
+            <svg lucideTrash2 [size]="20"></svg>
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="mt-12 card bg-neutral text-neutral-content p-8 shadow-2xl rounded-[2.5rem]">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div>
+          <h3 class="text-2xl font-bold">Ready to checkout?</h3>
+          <p class="opacity-60 text-sm">Secure payment and fast delivery across Egypt.</p>
+        </div>
+        <div class="flex flex-col items-end">
+          <div class="flex items-baseline gap-2">
+            <span class="opacity-50 text-sm uppercase font-bold tracking-widest">Total:</span>
+            <span class="text-4xl font-black text-primary">{{ cartStore.totalPrice() }}</span>
+            <span class="text-primary font-bold">EGP</span>
+          </div>
+          <button
+            routerLink="/checkout"
+            class="btn btn-primary btn-wide mt-4 rounded-2xl h-14 text-lg font-black group"
+          >
+            Proceed to Payment
+            <svg
+              lucideArrowRight
+              [size]="20"
+              class="ml-2 group-hover:translate-x-1 transition-transform"
+            ></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="flex flex-col items-center justify-center py-24 text-center">
+      <div class="relative mb-8">
+        <div
+          class="absolute inset-0 bg-primary/10 rounded-full blur-3xl scale-150 animate-pulse"
+        ></div>
+        <div class="relative p-10 bg-base-100 rounded-[3rem] shadow-inner border border-base-200">
+          <svg lucideShoppingBag [size]="80" class="text-base-content/10"></svg>
+        </div>
+      </div>
+
+      <h2 class="text-3xl font-black text-base-content">Your cart is empty</h2>
+      <p class="text-base-content/50 max-w-sm mt-3 leading-relaxed">
+        It looks like you haven't added any luxury pieces to your collection yet.
+      </p>
+
+      <button
+        routerLink="/products"
+        class="btn btn-primary btn-wide mt-10 rounded-2xl h-14 font-black shadow-lg shadow-primary/20"
+      >
+        Start Shopping
+      </button>
+    </div>
+  }
+</div>

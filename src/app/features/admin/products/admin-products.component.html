@@ -1,0 +1,162 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-4xl font-bold">Manage Products</h1>
+    <button class="btn btn-primary" (click)="openForm()">Add Product</button>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-zebra w-full">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (product of products(); track product._id) {
+          <tr>
+            <td>
+              <img
+                [src]="product.imageUrl[0]"
+                [alt]="product.name"
+                class="w-16 h-16 object-cover rounded"
+              />
+            </td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.category }}</td>
+            <td>${{ product.price }}</td>
+            <!-- <td>{{ product.stock }}</td>
+            <td>
+              <span class="badge" [ngClass]="product.isActive ? 'badge-success' : 'badge-error'">
+                {{ product.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn btn-sm btn-outline" (click)="openForm(product)">Edit</button>
+                <button class="btn btn-sm btn-outline" (click)="toggleActive(product)">
+                  {{ product.isActive ? 'Deactivate' : 'Activate' }}
+                </button>
+                <button class="btn btn-sm btn-error" (click)="deleteProduct(product)">
+                  Delete
+                </button>
+              </div>
+            </td> -->
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Product Form Modal -->
+  @if (showForm()) {
+    <div class="modal modal-open">
+      <div class="modal-box max-w-2xl">
+        <h3 class="font-bold text-lg mb-4">
+          {{ editingProduct() ? 'Edit Product' : 'Add Product' }}
+        </h3>
+
+        <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Name</span>
+              </label>
+              <input
+                type="text"
+                formControlName="name"
+                class="input input-bordered"
+                placeholder="Product name"
+              />
+            </div>
+
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Category</span>
+              </label>
+              <input
+                type="text"
+                formControlName="category"
+                class="input input-bordered"
+                placeholder="Product category"
+              />
+            </div>
+
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Price</span>
+              </label>
+              <input
+                type="number"
+                formControlName="price"
+                class="input input-bordered"
+                placeholder="0.00"
+                step="0.01"
+              />
+            </div>
+
+            <div class="form-control">
+              <label class="label">
+                <span class="label-text">Stock</span>
+              </label>
+              <input
+                type="number"
+                formControlName="stock"
+                class="input input-bordered"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Description</span>
+            </label>
+            <textarea
+              formControlName="description"
+              class="textarea textarea-bordered"
+              placeholder="Product description"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Colors (comma separated)</span>
+            </label>
+            <input
+              type="text"
+              formControlName="colors"
+              class="input input-bordered"
+              placeholder="Red, Blue, Green"
+            />
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Images (URLs, comma separated)</span>
+            </label>
+            <input
+              type="text"
+              formControlName="images"
+              class="input input-bordered"
+              placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+            />
+          </div>
+
+          <div class="modal-action">
+            <button type="button" class="btn" (click)="closeForm()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">
+              {{ editingProduct() ? 'Update' : 'Create' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,65 @@
+<div class="container mx-auto px-4 py-12 max-w-4xl">
+  <div class="flex flex-col md:flex-row gap-12">
+    <!-- Sidebar -->
+    <div class="w-full md:w-64 shrink-0">
+      <div class="card bg-base-200 p-8 rounded-[2rem] text-center">
+        <div class="avatar placeholder mb-4">
+          <div class="bg-primary text-primary-content rounded-full w-24">
+            <span class="text-4xl font-black uppercase">{{ authStore.user()?.name?.[0] }}</span>
+          </div>
+        </div>
+        <h2 class="text-2xl font-black">{{ authStore.user()?.name }}</h2>
+        <p class="text-xs font-black uppercase opacity-40 tracking-widest mt-1">
+          {{ authStore.user()?.role }}
+        </p>
+        <div class="divider"></div>
+        <button (click)="authStore.logout()" class="btn btn-ghost btn-block btn-sm text-error font-black uppercase">
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 space-y-8">
+      <div>
+        <h1 class="text-5xl font-black mb-2">Profile</h1>
+        <p class="text-base-content/50 font-medium">Manage your account details and preferences.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="card bg-base-100 border border-base-200 p-8 rounded-[2rem] shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">Full Name</span>
+          <p class="text-xl font-bold">{{ authStore.user()?.name }}</p>
+        </div>
+
+        <div class="card bg-base-100 border border-base-200 p-8 rounded-[2rem] shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">Email Address</span>
+          <p class="text-xl font-bold">{{ authStore.user()?.email }}</p>
+        </div>
+
+        <div class="card bg-base-100 border border-base-200 p-8 rounded-[2rem] shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">Joined On</span>
+          <p class="text-xl font-bold">{{ authStore.user()?.createdAt | date:'longDate' }}</p>
+        </div>
+
+        <div class="card bg-base-100 border border-base-200 p-8 rounded-[2rem] shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">Account Security</span>
+          <p class="text-sm font-bold text-success flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Active & Verified
+          </p>
+        </div>
+      </div>
+
+      <div class="card bg-primary/5 border border-primary/10 p-8 rounded-[2.5rem]">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-xl font-black mb-1">Your Collections</h3>
+            <p class="text-sm opacity-60">View your order history and track active deliveries.</p>
+          </div>
+          <button class="btn btn-primary rounded-2xl px-8" routerLink="/orders">Orders</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

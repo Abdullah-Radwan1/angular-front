@@ -1,0 +1,59 @@
+<div class="container mx-auto px-8 py-10 space-y-16">
+  <!-- HERO -->
+  <app-carousel />
+
+  <!-- ✨ CHOSEN FOR YOU -->
+  <section class="space-y-6">
+    <div class="space-y-1">
+      <div class="flex items-center gap-2">
+        <svg lucideSparkles class="text-primary"></svg>
+        <h2 class="text-3xl font-bold">Chosen for You</h2>
+      </div>
+      <p class="text-sm text-base-content/60">
+        Curated décor pieces that match your aesthetic taste
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      @for (product of featured(); track product._id) {
+        <div class="hover:scale-[1.02] transition-transform duration-300">
+          <app-product-card [product]="product" />
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 🔥 FAST SELLING -->
+  <section class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-end justify-between">
+      <div class="space-y-1 mt-8">
+        <div class="flex items-center gap-2">
+          <svg lucideFlame class="text-error"></svg>
+          <h2 class="text-3xl font-bold">Fast Selling</h2>
+        </div>
+        <p class="text-sm text-base-content/60">Limited stock décor pieces — selling quickly</p>
+      </div>
+
+      <div class="badge badge-error badge-lg gap-2 animate-pulse">
+        <span class="w-2 h-2 rounded-full animate-ping"></span>
+        Low Stock Alert
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      @if (fastSellingLoading()) {
+        @for (_ of [1, 2, 3, 4]; track $index) {
+          <app-skeleton-card-component />
+        }
+      } @else {
+        @for (product of fastSelling(); track product._id) {
+          <div class="hover:scale-[1.02] transition-transform duration-300">
+            <app-product-card [product]="product" />
+          </div>
+        }
+      }
+    </div>
+  </section>
+</div>

@@ -1,0 +1,49 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-4xl font-bold mb-8">Manage Orders</h1>
+
+  <div class="space-y-6">
+    @for (order of orders(); track order.id) {
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="card-title">Order #{{ order.id }}</h3>
+              <p class="text-sm opacity-70">{{ order.createdAt | date: 'medium' }}</p>
+              <p class="text-sm">Customer: {{ order.user }}</p>
+            </div>
+            <div class="text-right">
+              <select
+                class="select select-bordered select-sm mb-2"
+                [value]="order.status"
+                (change)="updateOrderStatus(order, $any($event.target).value)"
+              >
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="shipped">Shipped</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <p class="text-lg font-semibold">${{ order.totalPrice }}</p>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            @for (item of order.items; track item.product) {
+              <div class="flex items-center gap-4">
+                <img
+                  [src]="item.product.imageUrl"
+                  [alt]="item.product.name"
+                  class="w-12 h-12 object-cover rounded"
+                />
+                <div class="flex-1">
+                  <p class="font-semibold">{{ item.product.name }}</p>
+                  <p class="text-sm opacity-70">Qty: {{ item.quantity }}</p>
+                </div>
+                <p class="font-semibold">${{ item.price * item.quantity }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
