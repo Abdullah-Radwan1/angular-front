@@ -10,3 +10,4 @@ export const authRoutes: Routes = [
     loadComponent: () => import('./auth.component').then((m) => m.AuthComponent),
   },
 ];
+//test
