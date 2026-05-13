@@ -1,0 +1,100 @@
+<section #sectionRef id="experience" class="px-4 py-24 md:px-8 bg-base-200/40">
+  <div class="mx-auto max-w-6xl">
+    <!-- Header -->
+    <div class="fade-up mx-auto mb-16 max-w-3xl text-center" [class.show]="inView()">
+      <p class="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-primary">
+        {{ sectionTitle }}
+      </p>
+
+      <h2 class="text-3xl font-extrabold md:text-5xl tracking-tight">
+        {{ sectionHeading }}
+      </h2>
+
+      <p class="mt-4 text-sm md:text-base opacity-70">
+        My professional journey and experience building real-world applications.
+      </p>
+    </div>
+
+    <!-- Timeline -->
+    <div class="relative">
+      <!-- Vertical Line -->
+      <div class="absolute left-5 top-0 h-full w-px bg-base-300 md:left-6"></div>
+
+      @if (loading()) {
+        <app-loader />
+      } @else if (experiences()?.length) {
+        <div class="flex flex-col gap-10">
+          @for (exp of experiences(); track exp.company; let i = $index) {
+            <div
+              class="fade-up relative pl-12 md:pl-16"
+              [class.show]="inView()"
+              [style.transitionDelay]="getDelay(i)"
+            >
+              <!-- Timeline Icon -->
+              <div
+                class="absolute left-0 top-2 grid h-10 w-10 place-items-center rounded-full bg-primary/15 text-primary ring-4 ring-base-100 transition group-hover:scale-110 md:h-11 md:w-11"
+              >
+                <ng-icon name="heroBriefcase" size="16" />
+              </div>
+
+              <!-- Card -->
+              <div
+                class="group rounded-2xl border border-base-300 bg-base-100/80 backdrop-blur p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/40"
+              >
+                <!-- Top Row -->
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <!-- Left -->
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <h3 class="text-lg font-bold tracking-wide">
+                        {{ exp.role }}
+                      </h3>
+
+                      @if (exp.current) {
+                        <span class="badge badge-success badge-sm">Current</span>
+                      }
+                    </div>
+
+                    <p class="text-sm text-primary font-medium mt-1">
+                      {{ exp.company }}
+                    </p>
+                  </div>
+
+                  <!-- Right -->
+                  <div class="flex flex-wrap gap-2 sm:flex-col sm:items-end">
+                    <span class="badge badge-outline gap-2 text-xs">
+                      <ng-icon name="heroCalendarDays" size="14" />
+                      {{ exp.period }}
+                    </span>
+
+                    <span class="badge badge-outline gap-2 text-xs">
+                      <ng-icon name="heroMapPin" size="14" />
+                      {{ exp.location }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="my-5 h-px bg-base-300/70"></div>
+
+                <!-- Bullets -->
+                <ul class="space-y-3">
+                  @for (bullet of exp.bullets; track bullet) {
+                    <li class="flex items-start gap-3 text-sm leading-6 text-base-content/70">
+                      <ng-icon
+                        name="heroCheckCircle"
+                        size="16"
+                        class="mt-1 text-primary shrink-0"
+                      />
+                      <span>{{ bullet }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</section>

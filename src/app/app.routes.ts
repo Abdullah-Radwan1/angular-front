@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+<<<<<<< HEAD
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
 
@@ -66,5 +67,30 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: '',
+=======
+import { Home } from './features/home/home';
+import { SkillsComponent } from './features/skills/skills';
+import { ProjectsComponent } from './features/projects/projects';
+import { ExperienceComponent } from './features/experience/experience';
+import { DashboardComponent } from './dashboard/dashboard.component';
+
+export const routes: Routes = [
+  { path: '', component: Home }, // "/" → Home
+  {
+    path: 'projects',
+    component: ProjectsComponent,
+  },
+  {
+    path: 'experience',
+    component: ExperienceComponent,
+  },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+  },
+  {
+    path: 'skills',
+    component: SkillsComponent,
+>>>>>>> ad21ca7f608955e0942e7442e6a004e1e81683c6
   },
 ];

@@ -1,0 +1,41 @@
+<div class="space-y-4">
+  <div class="flex justify-between items-center">
+    <h3 class="text-lg font-semibold">Projects</h3>
+    <button class="btn btn-primary btn-sm" (click)="onAdd()">+ Add Project</button>
+  </div>
+
+  <div class="card bg-base-100 border border-base-300 shadow-md">
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr class="text-xs uppercase opacity-60">
+            <th>Title</th>
+            <th>Description</th>
+            <th>Technologies</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let project of projects" class="hover">
+            <td class="font-medium">{{ project.title }}</td>
+            <td class="max-w-xs truncate">{{ project.description }}</td>
+            <td>
+              <div class="flex flex-wrap gap-1">
+                <span
+                  *ngFor="let tech of project.technologies"
+                  class="badge badge-outline badge-sm"
+                >
+                  {{ tech }}
+                </span>
+              </div>
+            </td>
+            <td class="text-right space-x-2">
+              <button class="btn btn-xs" (click)="onEdit(project)">Edit</button>
+              <button class="btn btn-xs btn-error" (click)="onDelete(project)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

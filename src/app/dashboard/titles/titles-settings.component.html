@@ -1,0 +1,50 @@
+<div class="card bg-base-200 border border-base-300 shadow-sm">
+  <div class="card-body max-w-xl">
+    <h3 class="text-xl font-bold mb-2">Website Title</h3>
+    <p class="text-sm opacity-60 mb-6">Control the main heading of your portfolio</p>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="flex justify-center py-10">
+      <span class="loading loading-spinner loading-md"></span>
+    </div>
+
+    <!-- Form -->
+    <div *ngIf="!loading" class="space-y-5">
+      <!-- MAIN TITLE -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-medium"> Main Title <span class="text-error">*</span> </span>
+        </label>
+
+        <input
+          type="text"
+          class="input input-bordered w-full focus:input-primary"
+          placeholder="e.g. Abdullah Radwan"
+          [(ngModel)]="title.main"
+        />
+      </div>
+
+      <!-- SUBTITLE -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text font-medium">Subtitle</span>
+        </label>
+
+        <input
+          type="text"
+          class="input input-bordered w-full focus:input-primary"
+          placeholder="e.g. Full Stack Developer"
+          [(ngModel)]="title.subtitle"
+        />
+      </div>
+
+      <!-- ACTION -->
+      <div class="flex justify-end pt-4">
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving || !title.main">
+          <span *ngIf="saving" class="loading loading-spinner loading-sm"></span>
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

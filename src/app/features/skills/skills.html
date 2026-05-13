@@ -1,0 +1,53 @@
+<section #sectionRef id="skills" class="px-4 py-24 md:px-8 bg-base-100">
+  <div class="mx-auto max-w-7xl">
+    <!-- Header -->
+    <div class="fade-up mx-auto mb-16 max-w-3xl text-center" [class.show]="inView()">
+      <p class="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-primary">Skills</p>
+
+      <h2 class="text-3xl font-extrabold md:text-5xl tracking-tight">My Tech Stack</h2>
+
+      <p class="mt-4 text-sm md:text-base opacity-70">
+        Technologies and tools I use to build scalable, modern applications.
+      </p>
+    </div>
+
+    <!-- Grid -->
+    @if (loading()) {
+      <app-loader />
+    } @else {
+      <div class="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
+        @for (cat of categories; track cat.key; let i = $index) {
+          <div
+            class="fade-up group rounded-2xl border border-base-300 bg-base-200/70 backdrop-blur p-6 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-primary/40"
+            [class.show]="inView()"
+            [style.transitionDelay.ms]="i * 100"
+          >
+            <!-- Header -->
+            <div class="mb-5 flex items-center gap-4">
+              <div
+                class="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary transition group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-content"
+              >
+                <ng-icon [name]="cat.icon" size="24" />
+              </div>
+
+              <h3 class="text-lg font-semibold tracking-wide">
+                {{ cat.title }}
+              </h3>
+            </div>
+
+            <!-- Skills -->
+            <div class="flex flex-wrap gap-2">
+              @for (skill of groupedSkills()[cat.key]; track skill._id) {
+                <span
+                  class="badge badge-outline px-3 py-2 text-xs font-medium transition-all duration-200 hover:badge-primary hover:scale-105 cursor-default"
+                >
+                  {{ skill.name }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
