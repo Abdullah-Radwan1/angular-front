@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { firstValueFrom } from 'rxjs';
 import { URL } from '../shared/ENV';
-import { Product } from '../shared/models/product.model';
+import { Product } from '../shared/models';
 
 export interface ProductState {
   products: Product[];

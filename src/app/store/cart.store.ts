@@ -13,32 +13,9 @@ import { firstValueFrom, Subject, debounceTime } from 'rxjs';
 import { URL } from '../shared/ENV';
 import { NotificationService } from '../shared/services/notification.service';
 
-/**
- * 🔥 Product as returned from backend (populated or partial safe)
- */
-export type CartProduct = {
-  _id: string;
-  name: string;
-  imageUrl: string;
-  price: number;
-  description: string;
+import { Product, CartItem as SharedCartItem } from '../shared/models';
 
-  variants?: {
-    color: string;
-    size?: string;
-    stock: number;
-  }[];
-};
-
-/**
- * 🔥 Cart item EXACTLY matching Mongo schema
- */
-export type CartItem = {
-  product: CartProduct;
-  quantity: number;
-  priceAtAdd: number;
-  isPriceChanged: boolean;
-};
+export type CartItem = SharedCartItem & { product: Product };
 
 export type CartState = {
   cart: CartItem[];
@@ -157,7 +134,7 @@ export const CartStore = signalStore(
       // ------------------------------------------------------
       // ADD TO CART (DEBOUNCED)
       // ------------------------------------------------------
-      addToCart: async (productOrId: CartProduct | string, quantity = 1) => {
+      addToCart: async (productOrId: Product | string, quantity = 1) => {
         const productId = typeof productOrId === 'string' ? productOrId : productOrId._id;
         // Optimistic update
         const currentCart = store.cart();

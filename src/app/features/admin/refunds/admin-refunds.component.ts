@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { NotificationService } from '../../../shared/services/notification.service';
-import { Refund } from '../../../shared/models/order.model';
+import { Refund } from '../../../shared/models';
 
 @Component({
   selector: 'app-admin-refunds',

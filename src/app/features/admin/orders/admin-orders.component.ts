@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { NotificationService } from '../../../shared/services/notification.service';
-import { Order } from '../../../shared/models/order.model';
+import { Order } from '../../../shared/models';
 
 @Component({
   selector: 'app-admin-orders',
@@ -31,7 +31,7 @@ export class AdminOrdersComponent implements OnInit {
   }
 
   updateOrderStatus(order: Order, status: Order['status']): void {
-    this.apiService.put(`/order/${order._id || order.id}`, { status }).subscribe({
+    this.apiService.put(`/order/${order._id || order._id}`, { status }).subscribe({
       next: () => {
         this.notificationService.success('Order status updated');
         this.loadOrders();

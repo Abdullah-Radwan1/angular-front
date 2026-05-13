@@ -1,0 +1,122 @@
+<div class="min-h-screen bg-base-100 py-16 px-4">
+  <div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <div
+        class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5"
+      >
+        <svg lucideFileText class="w-10 h-10 text-primary"></svg>
+      </div>
+
+      <h1 class="text-4xl font-black mb-3">Share Your Experience</h1>
+
+      <p class="text-base-content/70 text-lg">
+        We'd love to hear your feedback and experience with our service.
+      </p>
+    </div>
+
+    <!-- Card -->
+    <div class="card bg-base-200 shadow-2xl border border-base-300">
+      <div class="card-body p-8">
+        <form [formGroup]="testimonialForm" (ngSubmit)="onSubmit()" class="space-y-8">
+          <!-- Rating -->
+          <div>
+            <label class="label">
+              <span class="label-text text-base font-semibold"> Your Rating </span>
+            </label>
+
+            <div class="flex items-center gap-2 mt-3">
+              @for (star of [1, 2, 3, 4, 5]; track star) {
+                <button
+                  type="button"
+                  (mouseenter)="hoveredRating.set(star)"
+                  (mouseleave)="hoveredRating.set(0)"
+                  (click)="setRating(star)"
+                  class="transition-all duration-200 hover:scale-110"
+                >
+                  <svg
+                    lucideStar
+                    class="w-9 h-9"
+                    [class.text-yellow-400]="star <= (hoveredRating() || selectedRating())"
+                    [class.fill-yellow-400]="star <= (hoveredRating() || selectedRating())"
+                    [class.text-base-content/20]="star > (hoveredRating() || selectedRating())"
+                  ></svg>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div>
+            <label class="label">
+              <span class="label-text text-base font-semibold"> Your Testimonial </span>
+            </label>
+
+            <textarea
+              formControlName="content"
+              rows="6"
+              placeholder="Tell us about your experience..."
+              class="textarea textarea-bordered w-full text-base resize-none"
+            ></textarea>
+
+            @if (contentControl?.touched && contentControl?.invalid) {
+              <div class="mt-2 text-error text-sm space-y-1">
+                @if (contentControl?.errors?.['required']) {
+                  <p>Testimonial content is required.</p>
+                }
+
+                @if (contentControl?.errors?.['minlength']) {
+                  <p>Minimum 10 characters required.</p>
+                }
+
+                @if (contentControl?.errors?.['maxlength']) {
+                  <p>Maximum 500 characters allowed.</p>
+                }
+              </div>
+            }
+
+            <div class="text-right mt-2 text-sm text-base-content/50">
+              {{ contentControl?.value?.length || 0 }}/500
+            </div>
+          </div>
+
+          <!-- Success -->
+          @if (successMessage()) {
+            <div class="alert alert-success">
+              <span>{{ successMessage() }}</span>
+            </div>
+          }
+
+          <!-- Error -->
+          @if (errorMessage()) {
+            <div class="alert alert-error">
+              <span>{{ errorMessage() }}</span>
+            </div>
+          }
+
+          <!-- Submit -->
+          <button
+            type="submit"
+            class="btn btn-primary w-full text-base"
+            [disabled]="testimonialForm.invalid || isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              <span class="loading loading-spinner loading-sm"></span>
+
+              Submitting...
+            } @else {
+              <svg lucideSend class="w-5 h-5"></svg>
+
+              Submit Testimonial
+            }
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Display List of Testimonials -->
+    <div class="mt-20">
+      <app-testimonials />
+    </div>
+  </div>
+</div>

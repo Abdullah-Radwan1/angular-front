@@ -71,7 +71,6 @@ export class ProductsComponent implements OnInit {
       limit: 12,
       sort: this.sort(),
     };
-    console.log(this.categories);
     if (formValue.category) params.category = formValue.category;
     if (formValue.search) params.search = formValue.search;
     if (formValue.minPrice) params.minPrice = formValue.minPrice;

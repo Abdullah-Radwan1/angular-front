@@ -10,13 +10,21 @@ export class ApiService {
   private readonly baseUrl = 'http://localhost:3000/v1';
   private loading = signal(false);
 
+  // Define global options to include credentials for cookie-based auth
+  private readonly defaultOptions = {
+    withCredentials: true,
+  };
+
   constructor(private http: HttpClient) {}
 
   // ================= GET =================
   get<T>(endpoint: string, options?: { params?: any }): Observable<T> {
     this.loading.set(true);
 
-    const httpOptions = options ? { params: new HttpParams({ fromObject: options.params }) } : {};
+    const httpOptions = {
+      ...this.defaultOptions,
+      params: options?.params ? new HttpParams({ fromObject: options.params }) : undefined,
+    };
 
     return this.http.get<T>(`${this.baseUrl}${endpoint}`, httpOptions).pipe(
       catchError(this.handleError.bind(this)),
@@ -28,7 +36,7 @@ export class ApiService {
   post<T>(endpoint: string, data: any): Observable<T> {
     this.loading.set(true);
 
-    return this.http.post<T>(`${this.baseUrl}${endpoint}`, data).pipe(
+    return this.http.post<T>(`${this.baseUrl}${endpoint}`, data, this.defaultOptions).pipe(
       catchError(this.handleError.bind(this)),
       finalize(() => this.loading.set(false)),
     );
@@ -38,7 +46,7 @@ export class ApiService {
   put<T>(endpoint: string, data: any): Observable<T> {
     this.loading.set(true);
 
-    return this.http.put<T>(`${this.baseUrl}${endpoint}`, data).pipe(
+    return this.http.put<T>(`${this.baseUrl}${endpoint}`, data, this.defaultOptions).pipe(
       catchError(this.handleError.bind(this)),
       finalize(() => this.loading.set(false)),
     );
@@ -48,7 +56,7 @@ export class ApiService {
   delete<T>(endpoint: string): Observable<T> {
     this.loading.set(true);
 
-    return this.http.delete<T>(`${this.baseUrl}${endpoint}`).pipe(
+    return this.http.delete<T>(`${this.baseUrl}${endpoint}`, this.defaultOptions).pipe(
       catchError(this.handleError.bind(this)),
       finalize(() => this.loading.set(false)),
     );
@@ -58,7 +66,7 @@ export class ApiService {
   patch<T>(endpoint: string, data: any): Observable<T> {
     this.loading.set(true);
 
-    return this.http.patch<T>(`${this.baseUrl}${endpoint}`, data).pipe(
+    return this.http.patch<T>(`${this.baseUrl}${endpoint}`, data, this.defaultOptions).pipe(
       catchError(this.handleError.bind(this)),
       finalize(() => this.loading.set(false)),
     );
@@ -72,17 +80,14 @@ export class ApiService {
   // ================= ERROR HANDLING =================
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred!';
-
     if (error.error instanceof ErrorEvent) {
-      // Client-side error
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Server-side error
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+      // Return the actual backend error message if available
+      errorMessage =
+        error.error?.message || `Error Code: ${error.status}\nMessage: ${error.message}`;
     }
-
     console.error(errorMessage);
-
     return throwError(() => new Error(errorMessage));
   }
 }

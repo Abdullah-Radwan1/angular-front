@@ -39,17 +39,25 @@ export class CheckoutComponent {
 
     this.isLoading.set(true);
 
-    // The backend endpoint is /v1/orders
-    this.apiService.post('/orders', {}).subscribe({
+    // We only send the shipping info and payment method.
+    // The items are pulled from the DB on the backend.
+    const orderData = {
+      shippingAddress: this.checkoutForm.value,
+      paymentMethod: this.checkoutForm.value.paymentMethod,
+    };
+
+    this.apiService.post('/orders', orderData).subscribe({
       next: (res: any) => {
         this.notificationService.success('Order placed successfully!');
-        this.cartStore.clearCart(); // Manually clear frontend cart too
+
+        // Clear the local store since the DB cart is now empty
+        this.cartStore.clearCart();
+
         this.router.navigate(['/orders']);
       },
       error: (error) => {
-        console.error(error);
-        this.notificationService.error(error.error?.message || 'Failed to place order');
         this.isLoading.set(false);
+        this.notificationService.error(error.error?.message || 'Failed to place order');
       },
     });
   }

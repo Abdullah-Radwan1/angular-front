@@ -1,44 +1,178 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../shared/services/api.service';
-import { Order } from '../../shared/models/order.model';
+import { Order, OrdersResponse } from '../../shared/models';
+import {
+  LucideCircleX,
+  LucidePackage,
+  LucideCalendar,
+  LucideDollarSign,
+  LucideMapPin,
+  LucideTruck,
+  LucideClock,
+  LucideChevronDown,
+  LucideShoppingBag,
+  LucideRefreshCw,
+  LucideArrowLeft,
+  LucideArrowRight,
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    LucidePackage,
+    LucideShoppingBag,
+    LucideCalendar,
+    LucideRefreshCw,
+    LucideClock,
+    LucideDollarSign,
+    LucideTruck,
+    LucideCircleX,
+    LucideChevronDown,
+    LucideMapPin,
+    LucideArrowLeft,
+    LucideArrowRight,
+  ],
   templateUrl: './orders.component.html',
   styles: [],
 })
 export class OrdersComponent implements OnInit {
-  orders = signal<Order[]>([]);
+  private readonly apiService = inject(ApiService);
 
-  constructor(private apiService: ApiService) {}
+  // Signals for state management
+  orders = signal<Order[]>([]);
+  isLoading = signal(false);
+  expandedOrderId = signal<string | null>(null);
+
+  // Pagination signals
+  currentPage = signal(1);
+  totalPages = signal(1);
+  totalOrders = signal(0);
+  limit = signal(10);
+
+  // Status filter
+  selectedStatus = signal<string>('all');
+
+  // Computed values
+  hasOrders = computed(() => this.orders().length > 0);
+  showPagination = computed(() => !this.isLoading() && this.hasOrders() && this.totalPages() > 1);
+  pageNumbers = computed(() => {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: number[] = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      if (current <= 3) {
+        for (let i = 1; i <= 5; i++) pages.push(i);
+        pages.push(-1); // Separator
+        pages.push(total);
+      } else if (current >= total - 2) {
+        pages.push(1);
+        pages.push(-1);
+        for (let i = total - 4; i <= total; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push(-1);
+        for (let i = current - 1; i <= current + 1; i++) pages.push(i);
+        pages.push(-1);
+        pages.push(total);
+      }
+    }
+    return pages;
+  });
+
+  // Effect to reload when filters change
+  private readonly filterEffect = effect(() => {
+    // Trigger when page or status changes
+    this.currentPage();
+    this.selectedStatus();
+    this.loadOrders();
+  });
 
   ngOnInit(): void {
     this.loadOrders();
   }
 
-  private loadOrders(): void {
-    this.apiService.get<Order[]>('/order/my').subscribe({
-      next: (orders) => this.orders.set(orders),
-      error: (error) => console.error('Error loading orders:', error),
+  loadOrders(): void {
+    this.isLoading.set(true);
+
+    let url = `/orders/my?page=${this.currentPage()}&limit=${this.limit()}&order=desc`;
+    if (this.selectedStatus() !== 'all') {
+      url += `&status=${this.selectedStatus()}`;
+    }
+
+    this.apiService.get<OrdersResponse>(url).subscribe({
+      next: (response) => {
+        this.orders.set(response.data);
+        this.totalPages.set(response.pagination.totalPages);
+        this.totalOrders.set(response.pagination.totalResult);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading orders:', error);
+        this.isLoading.set(false);
+      },
     });
   }
 
+  toggleOrder(orderId: string): void {
+    this.expandedOrderId.set(this.expandedOrderId() === orderId ? null : orderId);
+  }
+
   getStatusClass(status: string): string {
-    switch (status) {
-      case 'pending':
-        return 'badge-warning';
-      case 'paid':
-        return 'badge-info';
-      case 'shipped':
-        return 'badge-primary';
-      case 'cancelled':
-        return 'badge-error';
-      default:
-        return 'badge-neutral';
+    const classes = {
+      pending: 'badge-warning',
+      paid: 'badge-info',
+      shipped: 'badge-primary',
+      delivered: 'badge-success',
+      cancelled: 'badge-error',
+    };
+    return classes[status as keyof typeof classes] || 'badge-neutral';
+  }
+
+  getStatusIcon(status: string): string {
+    const icons = {
+      pending: 'clock',
+      paid: 'dollarSign',
+      shipped: 'truck',
+      delivered: 'checkCircle',
+      cancelled: 'xCircle',
+    };
+    return icons[status as keyof typeof icons] || 'package';
+  }
+
+  getStatusColor(status: string): string {
+    const colors = {
+      pending: 'text-warning',
+      paid: 'text-info',
+      shipped: 'text-primary',
+      delivered: 'text-success',
+      cancelled: 'text-error',
+    };
+    return colors[status as keyof typeof colors] || 'text-base-content';
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  }
+
+  onStatusFilterChange(status: string): void {
+    this.selectedStatus.set(status);
+    this.currentPage.set(1);
+  }
+
+  refreshOrders(): void {
+    this.loadOrders();
   }
 }

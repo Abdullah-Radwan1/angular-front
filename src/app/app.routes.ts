@@ -12,6 +12,12 @@ export const routes: Routes = [
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.authRoutes),
   },
   {
+    path: 'testimonials',
+
+    loadChildren: () =>
+      import('./features/testimonial/testimonial').then((m) => m.TestimonialComponent),
+  },
+  {
     path: 'products',
     loadChildren: () => import('./features/products/products.routes').then((m) => m.productsRoutes),
   },
@@ -39,6 +45,7 @@ export const routes: Routes = [
     loadChildren: () => import('./features/orders/orders.routes').then((m) => m.ordersRoutes),
     canActivate: [AuthGuard],
   },
+
   {
     path: 'profile',
     loadComponent: () => {

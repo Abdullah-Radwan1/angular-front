@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../shared/services/api.service';
-import { Product } from '../../shared/models';
-import { AddToCartRequest } from '../../shared/models/cart.model';
+import { Product, AddToCartRequest } from '../../shared/models';
 import { AuthStore } from '../../store/auth.store';
 import { CartStore } from '../../store/cart.store';
 import { ProductCardComponent } from '../../shared/components/product-card/product.card.component';
@@ -74,10 +73,8 @@ export class ProductDetailsComponent implements OnInit {
         this.selectedColor.set(firstAvailable?.color ?? null);
 
         // Load related products
-        if (product.category) {
-          const categoryId =
-            typeof product.category === 'string' ? product.category : (product.category as any)._id;
-          this.loadRelatedProducts(categoryId, product._id);
+        if (product.slug) {
+          this.loadRelatedProducts(product.slug);
         }
       },
       error: (error) => {
@@ -88,11 +85,13 @@ export class ProductDetailsComponent implements OnInit {
     });
   }
 
-  private loadRelatedProducts(categoryId: string, excludeId: string): void {
-    this.apiService.get<any>(`/products?category=${categoryId}&limit=5`).subscribe({
-      next: (res) => {
-        const filtered = (res.products || []).filter((p: Product) => p._id !== excludeId);
-        this.relatedProducts.set(filtered.slice(0, 4));
+  private loadRelatedProducts(slug: string): void {
+    this.apiService.get<Product[]>(`/products/related/${slug}`).subscribe({
+      next: (products) => {
+        this.relatedProducts.set(products);
+      },
+      error: (err) => {
+        console.error('Error loading related products:', err);
       },
     });
   }
@@ -101,15 +100,23 @@ export class ProductDetailsComponent implements OnInit {
     this.selectedColor.set(color);
   }
 
-  addToCart(): void {
+  async addToCart(): Promise<void> {
     if (this.cartForm.invalid || !this.product()) return;
 
     this.isAdding.set(true);
     const { quantity } = this.cartForm.value;
 
-    // Use your store logic
-    this.cartStore.addToCart(this.product()!, quantity);
-
-    this.isAdding.set(false);
+    try {
+      // We add a small artificial delay so the user can actually see the "Adding..." state.
+      // This makes the UI feel more responsive to the action.
+      await Promise.all([
+        this.cartStore.addToCart(this.product()!, quantity),
+        new Promise((resolve) => setTimeout(resolve, 600)),
+      ]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      this.isAdding.set(false);
+    }
   }
 }

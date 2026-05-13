@@ -59,22 +59,43 @@
 
         <div class="form-control">
           <label class="label pb-1"
-            ><span class="label-text font-bold text-xs uppercase opacity-60"
-              >Email Address</span
-            ></label
+            ><span class="label-text font-bold text-xs uppercase opacity-60">{{
+              isLoginMode() ? 'Email or Phone' : 'Email Address'
+            }}</span></label
           >
           <div class="relative">
             <span class="absolute inset-y-0 left-3 flex items-center opacity-40"
               ><svg lucideMail [size]="16"></svg
             ></span>
             <input
-              type="email"
-              formControlName="email"
+              [type]="isLoginMode() ? 'text' : 'email'"
+              [formControlName]="isLoginMode() ? 'identifier' : 'email'"
               class="input input-bordered w-full focus:input-primary"
-              placeholder="name@example.com"
+              [placeholder]="isLoginMode() ? 'name@example.com or phone' : 'name@example.com'"
             />
           </div>
         </div>
+
+        @if (!isLoginMode()) {
+          <div class="form-control">
+            <label class="label pb-1"
+              ><span class="label-text font-bold text-xs uppercase opacity-60"
+                >Phone Number</span
+              ></label
+            >
+            <div class="relative">
+              <span class="absolute inset-y-0 left-3 flex items-center opacity-40"
+                ><svg lucidePhone [size]="16"></svg
+              ></span>
+              <input
+                type="text"
+                formControlName="phone"
+                class="input input-bordered w-full focus:input-primary"
+                placeholder="0123456789"
+              />
+            </div>
+          </div>
+        }
 
         <div class="form-control">
           <div class="flex justify-between items-center">

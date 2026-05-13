@@ -1,6 +1,17 @@
 export interface ProductVariant {
   color: string;
+  size?: string;
   stock: number;
+}
+
+export interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  isDeleted: boolean;
+  __v?: number;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface Product {
@@ -13,14 +24,15 @@ export interface Product {
   imageUrl: string;
   price: number;
 
-  category: string;
+  category: Category;
 
   variants: ProductVariant[];
 
   tags?: string[];
 
   isDeleted?: boolean;
+  isFeatured?: boolean;
 
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }

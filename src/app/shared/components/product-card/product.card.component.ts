@@ -6,7 +6,9 @@ import {
   OnChanges,
   SimpleChanges,
   inject,
+  signal,
 } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { Product } from '../../models';
 import { CartStore } from '../../../store/cart.store';
@@ -17,65 +19,127 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './product.card.component.html',
+
+  // ------------------------------------------------------
+  // ONPUSH = better performance
+  // BUT requires reactive patterns
+  // Signals work perfectly with OnPush
+  // ------------------------------------------------------
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductCardComponent implements OnInit, OnChanges {
   @Input() product!: Product;
 
-  cartStore = inject(CartStore);
+  // ------------------------------------------------------
+  // INJECT STORE
+  // ------------------------------------------------------
+  readonly cartStore = inject(CartStore);
 
+  // ------------------------------------------------------
+  // SIGNALS
+  // ------------------------------------------------------
+  // Signals automatically notify Angular UI updates
+  // even with OnPush strategy.
+  // ------------------------------------------------------
+  isAdding = signal(false);
+
+  // ------------------------------------------------------
+  // NORMAL STATE
+  // ------------------------------------------------------
   selectedColor: string | null = null;
   imageLoaded = false;
-  isAdding = false;
 
   productName = '';
   productDescription = '';
   totalStock = 0;
   isInStock = false;
 
+  // ------------------------------------------------------
+  // INIT
+  // ------------------------------------------------------
   ngOnInit(): void {
     this.calculateProduct();
   }
 
+  // ------------------------------------------------------
+  // HANDLE INPUT CHANGES
+  // ------------------------------------------------------
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['product']) {
       this.calculateProduct();
     }
   }
 
+  // ------------------------------------------------------
+  // CALCULATE PRODUCT DATA
+  // ------------------------------------------------------
   private calculateProduct(): void {
     if (!this.product) return;
 
     this.productName = this.product.name ?? '';
+
     this.productDescription = this.product.description ?? '';
 
+    // Calculate total stock
     this.totalStock = this.product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) ?? 0;
 
+    // Check stock availability
     this.isInStock = this.totalStock > 0;
 
+    // Select first available color
     const firstAvailable = this.product.variants?.find((v) => v.stock > 0);
+
     this.selectedColor = firstAvailable?.color ?? null;
   }
 
+  // ------------------------------------------------------
+  // SELECT PRODUCT COLOR
+  // ------------------------------------------------------
   selectColor(color: string): void {
     this.selectedColor = color;
   }
 
+  // ------------------------------------------------------
+  // ADD TO CART
+  // ------------------------------------------------------
   async addToCart(): Promise<void> {
-    console.log(this.isInStock);
-    console.log(this.isAdding);
+    // Prevent duplicate clicks
+    if (this.isAdding()) return;
 
-    this.isAdding = true;
+    // Prevent adding out-of-stock products
+    if (!this.isInStock) return;
+
+    console.log('In stock:', this.isInStock);
+
+    // Start loading state
+    this.isAdding.set(true);
 
     try {
-      await this.cartStore.addToCart(this.product as any, 1);
+      // ------------------------------------------------------
+      // Optimistic cart update
+      // ------------------------------------------------------
+      // Your store method is NOT truly async,
+      // so we do NOT await it.
+      this.cartStore.addToCart(this.product, 1);
+
+      // ------------------------------------------------------
+      // Small UX delay
+      // ------------------------------------------------------
+      // Lets user visually notice the loader.
+      await new Promise((resolve) => setTimeout(resolve, 600));
     } catch (err) {
-      console.error(err);
+      console.error('Add to cart failed:', err);
     } finally {
-      this.isAdding = false;
+      // Stop loading state
+      this.isAdding.set(false);
+
+      console.log('isAdding:', this.isAdding());
     }
   }
 
+  // ------------------------------------------------------
+  // IMAGE LOADED
+  // ------------------------------------------------------
   onImageLoad(): void {
     this.imageLoaded = true;
   }

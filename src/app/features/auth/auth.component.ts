@@ -9,6 +9,7 @@ import {
   LucideLogIn,
   LucideMail,
   LucidePackage,
+  LucidePhone,
   LucideUser,
   LucideUserPlus,
 } from '@lucide/angular';
@@ -25,6 +26,7 @@ import {
     LucideUser,
     LucideLogIn,
     LucideUserPlus,
+    LucidePhone,
     ReactiveFormsModule,
   ],
   templateUrl: './auth.component.html',
@@ -41,19 +43,36 @@ export class AuthComponent {
   ) {
     this.authForm = this.createForm();
   }
+  emailOrPhoneValidator(form: FormGroup) {
+    const email = form.get('email')?.value;
+    const phone = form.get('phone')?.value;
 
-  private createForm(): FormGroup {
-    const form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-    });
-
-    if (!this.isLoginMode()) {
-      (form as any).addControl('firstName', this.fb.control('', Validators.required));
-      (form as any).addControl('lastName', this.fb.control('', Validators.required));
+    if (!email && !phone) {
+      return { emailOrPhoneRequired: true };
     }
 
-    return form;
+    return null;
+  }
+  private createForm(): FormGroup {
+    if (this.isLoginMode()) {
+      return this.fb.group({
+        identifier: ['', Validators.required],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+      });
+    }
+
+    return this.fb.group(
+      {
+        firstName: ['', Validators.required],
+        lastName: ['', Validators.required],
+        email: ['', Validators.email],
+        phone: ['', [Validators.minLength(11)]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+      },
+      {
+        validators: this.emailOrPhoneValidator,
+      },
+    );
   }
 
   toggleMode(): void {
@@ -67,13 +86,18 @@ export class AuthComponent {
     this.isLoading.set(true);
 
     try {
+      const formValue = this.authForm.value;
       if (this.isLoginMode()) {
-        await this.authStore.login(this.authForm.value as LoginRequest);
+        await this.authStore.login({
+          email: formValue.identifier,
+          password: formValue.password,
+          phone: formValue.identifier, // Send as both to be safe with backend extraction
+        } as LoginRequest);
       } else {
-        const formValue = this.authForm.value;
         const registerData: RegisterRequest = {
           name: `${formValue.firstName} ${formValue.lastName}`,
-          email: formValue.email,
+          email: formValue.email || undefined,
+          phone: formValue.phone || undefined,
           password: formValue.password,
         };
         await this.authStore.register(registerData);

@@ -8,27 +8,10 @@ import { firstValueFrom } from 'rxjs';
 
 import { URL } from '../shared/ENV';
 
+import { User, LoginRequest, RegisterRequest, ChangePasswordRequest } from '../shared/models';
+import { AuthResponse } from '../shared/models/auth.model';
+
 const USER_STORAGE_KEY = 'auth_user';
-
-export type User = {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type LoginRequest = {
-  email: string;
-  password: string;
-};
-
-export type RegisterRequest = {
-  name: string;
-  email: string;
-  password: string;
-};
 
 type AuthState = {
   user: User | null;
@@ -61,63 +44,62 @@ export const AuthStore = signalStore(
       // ------------------------------------------------------
       // LOGIN
       // ------------------------------------------------------
+      // ... inside withMethods((store) => {
+
       login: async (credentials: LoginRequest) => {
         patchState(store, { loading: true });
 
         try {
-          const user = await firstValueFrom(
-            http.post<User>(`${URL}/auth/login`, credentials, {
+          // 1. Set the type to <any> or a Response interface to handle the wrapper object
+          const response = await firstValueFrom(
+            http.post<{ user: AuthResponse }>(`${URL}/auth/login`, credentials, {
               withCredentials: true,
             }),
           );
 
-          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+          // 2. Extract the user object from the response
+          const userData = response.user;
+
+          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
 
           patchState(store, {
-            user,
+            user: userData.user, // Store the clean User object
             loading: false,
           });
 
           await router.navigate(['/']);
         } catch (error) {
-          patchState(store, {
-            loading: false,
-          });
-
+          patchState(store, { loading: false });
           throw error;
         }
       },
 
-      // ------------------------------------------------------
-      // REGISTER
-      // ------------------------------------------------------
       register: async (data: RegisterRequest) => {
         patchState(store, { loading: true });
 
         try {
-          const user = await firstValueFrom(
-            http.post<User>(`${URL}/auth/register`, data, {
+          // 1. Use the same extraction logic for Register
+          const response = await firstValueFrom(
+            http.post<{ user: User }>(`${URL}/auth/register`, data, {
               withCredentials: true,
             }),
           );
 
-          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+          const userData = response.user;
+
+          localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
 
           patchState(store, {
-            user,
+            user: userData,
             loading: false,
           });
 
           await router.navigate(['/']);
         } catch (error) {
-          patchState(store, {
-            loading: false,
-          });
-
+          patchState(store, { loading: false });
           throw error;
         }
       },
-
       // ------------------------------------------------------
       // LOAD CURRENT USER
       // ------------------------------------------------------
@@ -130,7 +112,7 @@ export const AuthStore = signalStore(
               withCredentials: true,
             }),
           );
-          
+
           // The backend returns { user: { ... } }
           const userData = user.user;
 
@@ -173,6 +155,25 @@ export const AuthStore = signalStore(
         });
 
         await router.navigate(['/auth/login']);
+      },
+
+      // ------------------------------------------------------
+      // CHANGE PASSWORD
+      // ------------------------------------------------------
+      changePassword: async (data: ChangePasswordRequest) => {
+        patchState(store, { loading: true });
+
+        try {
+          await firstValueFrom(
+            http.post(`${URL}/auth/change-password`, data, {
+              withCredentials: true,
+            }),
+          );
+          patchState(store, { loading: false });
+        } catch (error) {
+          patchState(store, { loading: false });
+          throw error;
+        }
       },
     };
   }),

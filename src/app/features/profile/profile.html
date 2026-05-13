@@ -2,7 +2,7 @@
   <div class="flex flex-col md:flex-row gap-12">
     <!-- Sidebar -->
     <div class="w-full md:w-64 shrink-0">
-      <div class="card bg-base-200 p-8 rounded-[2rem] text-center">
+      <div class="card bg-base-200 p-8 rounded-4xl text-center">
         <div class="avatar placeholder mb-4">
           <div class="bg-primary text-primary-content rounded-full w-24">
             <span class="text-4xl font-black uppercase">{{ authStore.user()?.name?.[0] }}</span>
@@ -13,7 +13,10 @@
           {{ authStore.user()?.role }}
         </p>
         <div class="divider"></div>
-        <button (click)="authStore.logout()" class="btn btn-ghost btn-block btn-sm text-error font-black uppercase">
+        <button
+          (click)="authStore.logout()"
+          class="btn btn-ghost btn-block btn-sm text-error font-black uppercase"
+        >
           Logout
         </button>
       </div>
@@ -27,25 +30,45 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="card bg-base-100 border border-base-200 p-8 rounded-[2rem] shadow-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">Full Name</span>
+        <div class="card bg-base-100 border border-base-200 p-8 rounded-4xl shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block"
+            >Full Name</span
+          >
           <p class="text-xl font-bold">{{ authStore.user()?.name }}</p>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 p-8 rounded-[2rem] shadow-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">Email Address</span>
+        <div class="card bg-base-100 border border-base-200 p-8 rounded-4xl shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block"
+            >Email Address</span
+          >
           <p class="text-xl font-bold">{{ authStore.user()?.email }}</p>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 p-8 rounded-[2rem] shadow-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">Joined On</span>
-          <p class="text-xl font-bold">{{ authStore.user()?.createdAt | date:'longDate' }}</p>
+        <div class="card bg-base-100 border border-base-200 p-8 rounded-4xl shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block"
+            >Joined On</span
+          >
+          <p class="text-xl font-bold">{{ authStore.user()?.createdAt | date: 'longDate' }}</p>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 p-8 rounded-[2rem] shadow-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">Account Security</span>
+        <div class="card bg-base-100 border border-base-200 p-8 rounded-4xl shadow-sm">
+          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block"
+            >Account Security</span
+          >
           <p class="text-sm font-bold text-success flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
             Active & Verified
           </p>
         </div>
@@ -59,6 +82,113 @@
           </div>
           <button class="btn btn-primary rounded-2xl px-8" routerLink="/orders">Orders</button>
         </div>
+      </div>
+
+      <!-- Security Section -->
+      <div class="card bg-base-100 border border-base-200 p-8 rounded-[2.5rem] shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-4">
+            <div class="p-3 bg-base-200 rounded-2xl text-primary">
+              <svg lucideLock size="24" strokeWidth="2.5" class="text-primary"></svg>
+            </div>
+            <div>
+              <h3 class="text-xl font-black">Security</h3>
+              <p class="text-sm opacity-50">Manage your password and account security</p>
+            </div>
+          </div>
+          <button (click)="togglePasswordForm()" class="btn btn-ghost btn-sm rounded-xl">
+            {{ showPasswordForm() ? 'Cancel' : 'Update Password' }}
+          </button>
+        </div>
+
+        @if (showPasswordForm()) {
+          <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-control w-full">
+                <label class="label">
+                  <span
+                    class="label-text font-black uppercase text-[10px] tracking-widest opacity-40"
+                  >
+                    Current Password
+                  </span>
+                </label>
+                <input
+                  type="password"
+                  formControlName="currentPassword"
+                  placeholder="••••••••"
+                  class="input input-bordered rounded-2xl bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div class="form-control w-full md:col-start-1">
+                <label class="label">
+                  <span
+                    class="label-text font-black uppercase text-[10px] tracking-widest opacity-40"
+                  >
+                    New Password
+                  </span>
+                </label>
+                <input
+                  type="password"
+                  formControlName="newPassword"
+                  placeholder="••••••••"
+                  class="input input-bordered rounded-2xl bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div class="form-control w-full">
+                <label class="label">
+                  <span
+                    class="label-text font-black uppercase text-[10px] tracking-widest opacity-40"
+                  >
+                    Confirm New Password
+                  </span>
+                </label>
+                <input
+                  type="password"
+                  formControlName="confirmPassword"
+                  placeholder="••••••••"
+                  class="input input-bordered rounded-2xl bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20"
+                />
+                @if (
+                  passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched
+                ) {
+                  <label class="label">
+                    <span class="label-text-alt text-error font-bold">Passwords do not match</span>
+                  </label>
+                }
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-4">
+              <button
+                type="submit"
+                [disabled]="passwordForm.invalid || authStore.loading()"
+                class="btn btn-primary rounded-2xl px-12 relative overflow-hidden group"
+              >
+                <span class="relative z-10 flex items-center gap-2">
+                  @if (authStore.loading()) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                  } @else {
+                    <svg lucideKeyRound size="18"></svg>
+                  }
+                  Update Password
+                </span>
+              </button>
+            </div>
+          </form>
+        } @else {
+          <div
+            class="p-6 bg-base-200/30 rounded-2xl flex items-center justify-between border border-dashed border-base-300"
+          >
+            <div class="flex items-center gap-3 opacity-50">
+              <svg lucideShieldCheck size="20"></svg>
+              <span class="text-sm font-medium"
+                >Your account is secured with a strong password</span
+              >
+            </div>
+          </div>
+        }
       </div>
     </div>
   </div>
