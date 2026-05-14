@@ -3,20 +3,33 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../shared/services/api.service';
 import { NotificationService } from '../../../shared/services/notification.service';
-import { Product } from '../../../shared/models';
+import { Product, PaginatedResponse } from '../../../shared/models/api-response-model';
 
 @Component({
   selector: 'app-admin-products',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './admin-products.component.html',
-  styles: [],
 })
 export class AdminProductsComponent implements OnInit {
+  // Data State
   products = signal<Product[]>([]);
+  categories = signal<any[]>([]);
+
+  // UI State
   showForm = signal(false);
   editingProduct = signal<Product | null>(null);
   productForm: FormGroup;
+  selectedFile: File | null = null;
+
+  // Search, Filter, & Sort State
+  searchQuery = signal('');
+  statusFilter = signal('all'); // options: 'all', 'active', 'archived'
+  sortOption = signal('-createdAt');
+
+  // Pagination State
+  currentPage = signal(1);
+  totalPages = signal(1);
 
   constructor(
     private fb: FormBuilder,
@@ -28,6 +41,7 @@ export class AdminProductsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadCategories();
   }
 
   private createForm(): FormGroup {
@@ -36,83 +50,208 @@ export class AdminProductsComponent implements OnInit {
       description: ['', Validators.required],
       price: [0, [Validators.required, Validators.min(0)]],
       category: ['', Validators.required],
-      colors: [[], Validators.required],
+      colors: ['', Validators.required], // Handled as string in UI, array in DB
       stock: [0, [Validators.required, Validators.min(0)]],
-      images: [[], Validators.required],
+      isActive: [true],
     });
   }
 
-  private loadProducts(): void {
-    this.apiService.get<Product[]>('/admin/products').subscribe({
-      next: (products) => this.products.set(products),
-      error: (error) => console.error('Error loading products:', error),
+  // --- Core Logic: Fetching Data ---
+  loadProducts(): void {
+    const params: any = {
+      search: this.searchQuery(),
+      sort: this.sortOption(),
+      page: this.currentPage(),
+    };
+
+    if (this.statusFilter() !== 'all') {
+      params.status = this.statusFilter();
+    }
+
+    this.apiService.get<PaginatedResponse<Product>>('/admin/products', { params }).subscribe({
+      next: (res) => {
+        this.products.set(res.data);
+        this.totalPages.set(res.pagination?.totalPages || 1);
+      },
+      error: () => this.notificationService.error('Failed to load products'),
     });
   }
 
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadProducts();
+    }
+  }
+
+  loadCategories(): void {
+    this.apiService.get<any>('/categories').subscribe({
+      next: (res) => this.categories.set(res.categories || res.data || []),
+      error: () => this.notificationService.error('Failed to load categories'),
+    });
+  }
+
+  // --- Event Handlers for Filters ---
+  onSearch(value: string): void {
+    this.searchQuery.set(value);
+    this.currentPage.set(1);
+    this.loadProducts();
+  }
+
+  onFilterStatus(status: string): void {
+    this.statusFilter.set(status);
+    this.currentPage.set(1);
+    this.loadProducts();
+  }
+
+  onSortChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.sortOption.set(value);
+    this.currentPage.set(1);
+    this.loadProducts();
+  }
+
+  // --- Form Actions ---
   openForm(product?: Product): void {
     this.showForm.set(true);
     if (product) {
       this.editingProduct.set(product);
-      this.productForm.patchValue(product);
+      // Join colors for display and get total stock
+      const displayData = {
+        ...product,
+        colors: product.variants?.map((v) => v.color).join(', ') || '',
+        stock: this.getTotalStock(product),
+      };
+      this.productForm.patchValue(displayData);
     } else {
       this.editingProduct.set(null);
-      this.productForm.reset();
+      this.productForm.reset({ price: 0, stock: 0, isActive: true });
+      this.selectedFile = null;
     }
+  }
+
+  getTotalStock(product: Product): number {
+    return product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
   }
 
   closeForm(): void {
     this.showForm.set(false);
     this.editingProduct.set(null);
     this.productForm.reset();
+    this.selectedFile = null;
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length) {
+      this.selectedFile = input.files[0];
+    }
   }
 
   onSubmit(): void {
     if (this.productForm.invalid) return;
 
-    const productData = this.productForm.value;
+    const formData = new FormData();
+    const rawData = this.productForm.value;
 
-    if (this.editingProduct()) {
-      this.apiService.put(`/admin/products/${this.editingProduct()!._id}`, productData).subscribe({
-        next: () => {
-          this.notificationService.success('Product updated successfully');
-          this.loadProducts();
-          this.closeForm();
-        },
-        error: (error) => this.notificationService.error('Failed to update product'),
-      });
-    } else {
-      this.apiService.post('/admin/products', productData).subscribe({
-        next: () => {
-          this.notificationService.success('Product created successfully');
-          this.loadProducts();
-          this.closeForm();
-        },
-        error: (error) => this.notificationService.error('Failed to create product'),
-      });
+    // Extract colors and stock to build variants
+    const colorString = rawData['colors'] || '';
+    const colorArray =
+      typeof colorString === 'string'
+        ? colorString
+            .split(',')
+            .map((s) => s.trim())
+            .filter((s) => s !== '')
+        : [];
+
+    const stock = Number(rawData['stock']);
+
+    const variants =
+      colorArray.length > 0
+        ? colorArray.map((color) => ({ color, stock }))
+        : [{ color: 'default', stock }];
+
+    // Process data before appending to FormData
+    Object.keys(rawData).forEach((key) => {
+      if (key === 'colors' || key === 'stock') return; // Handled by variants
+
+      let value = rawData[key];
+      if (Array.isArray(value)) {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value);
+      }
+    });
+
+    formData.append('variants', JSON.stringify(variants));
+
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile);
     }
+
+    const isEditing = !!this.editingProduct();
+    const endpoint = isEditing
+      ? `/admin/products/${this.editingProduct()!._id}`
+      : '/admin/products';
+
+    const request$ = isEditing
+      ? this.apiService.putFormData(endpoint, formData)
+      : this.apiService.postFormData(endpoint, formData);
+
+    request$.subscribe({
+      next: (res: any) => {
+        const updatedProduct = res.data;
+
+        if (isEditing) {
+          this.products.update((products) =>
+            products.map((p) => (p._id === updatedProduct._id ? updatedProduct : p)),
+          );
+
+          this.notificationService.success('Product updated successfully');
+        } else {
+          this.products.update((products) => [updatedProduct, ...products]);
+
+          this.notificationService.success('Product created successfully');
+        }
+
+        this.closeForm();
+      },
+
+      error: () => this.notificationService.error('Action failed'),
+    });
   }
 
   deleteProduct(product: Product): void {
-    if (confirm('Are you sure you want to delete this product?')) {
+    if (confirm(`Are you sure you want to permanently delete ${product.name}?`)) {
       this.apiService.delete(`/admin/products/${product._id}`).subscribe({
         next: () => {
+          this.products.update((products) => products.filter((p) => p._id !== product._id));
+
           this.notificationService.success('Product deleted successfully');
-          this.loadProducts();
         },
-        error: (error) => this.notificationService.error('Failed to delete product'),
+
+        error: () => this.notificationService.error('Failed to delete product'),
       });
     }
   }
 
   toggleActive(product: Product): void {
+    const newStatus = !product.isActive;
+
     this.apiService
-      .patch(`/admin/products/${product._id}`, { isDeleted: !product.isDeleted })
+      .put(`/admin/products/${product._id}`, {
+        isActive: newStatus,
+      })
       .subscribe({
         next: () => {
-          this.notificationService.success('Product status updated');
-          this.loadProducts();
+          this.products.update((products) =>
+            products.map((p) => (p._id === product._id ? { ...p, isActive: newStatus } : p)),
+          );
+
+          this.notificationService.success(`Product ${newStatus ? 'activated' : 'archived'}`);
         },
-        error: (error) => this.notificationService.error('Failed to update product status'),
+
+        error: () => this.notificationService.error('Status update failed'),
       });
   }
 }

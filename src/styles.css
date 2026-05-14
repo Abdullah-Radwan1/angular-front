@@ -1,15 +1,7 @@
-<<<<<<< HEAD
-/* You can add global styles to this file, and also import other style files */
-
-@import 'tailwindcss';
-
-@plugin "daisyui" {
-  themes: lofi;
-=======
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap');
 @import 'tailwindcss';
 @plugin "daisyui" {
-  themes: cupcake;
+  themes: lofi;
 }
 @plugin "daisyui/theme" {
   name: 'portfolio';
@@ -35,5 +27,4 @@
   --radius-box: 1rem;
   --radius-btn: 0.75rem;
   --border: 1px;
->>>>>>> ad21ca7f608955e0942e7442e6a004e1e81683c6
 }

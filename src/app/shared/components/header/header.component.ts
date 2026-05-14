@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterModule } from '@angular/router';
 import { AuthStore } from '../../../store/auth.store';
+import { CartStore } from '../../../store/cart.store';
 
 @Component({
   selector: 'app-header',
@@ -12,31 +13,19 @@ import { AuthStore } from '../../../store/auth.store';
 })
 export class HeaderComponent {
   readonly authStore = inject(AuthStore);
+  readonly cartStore = inject(CartStore);
 
-  get isAuthenticated() {
-    return this.authStore.isAuthenticated();
-  }
-
-  get isAdmin() {
-    return this.authStore.isAdmin();
-  }
-
-  get currentUser() {
-    return this.authStore.user();
-  }
+  // Expose signals for easier use in template
+  isAuthenticated = this.authStore.isAuthenticated;
+  isAdmin = this.authStore.isAdmin;
+  currentUser = this.authStore.user;
+  cartCount = this.cartStore.totalItems;
 
   userInitials = computed(() => {
-    const name = this.authStore.user()?.name.charAt(0).toUpperCase();
-
-    console.log(this.authStore.user());
-    if (!name) {
-      return '';
-    }
-
-    return name;
+    const user = this.currentUser();
+    if (!user || !user.name) return '';
+    return user.name.charAt(0).toUpperCase();
   });
-
-  cartCount = 0;
 
   logout(): void {
     this.authStore.logout();

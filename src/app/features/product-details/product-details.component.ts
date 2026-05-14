@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../shared/services/api.service';
-import { Product, AddToCartRequest } from '../../shared/models';
+import { Product, AddToCartRequest } from '../../shared/models/api-response-model';
 import { AuthStore } from '../../store/auth.store';
 import { CartStore } from '../../store/cart.store';
 import { ProductCardComponent } from '../../shared/components/product-card/product.card.component';

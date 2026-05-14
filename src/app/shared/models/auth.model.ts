@@ -1,9 +1,8 @@
 import { User } from './user.model';
 
 export interface LoginRequest {
-  email: string; // This will act as the identifier (email or phone)
+  identifier: string;
   password: string;
-  phone: string;
 }
 
 export interface RegisterRequest {
@@ -15,7 +14,7 @@ export interface RegisterRequest {
 
 export interface AuthResponse {
   user: User;
-  token?: string; // If you also send the token back
+  token?: string;
   message?: string;
 }
 

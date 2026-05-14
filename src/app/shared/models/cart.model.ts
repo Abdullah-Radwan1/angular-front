@@ -3,7 +3,6 @@ import { Product } from './product.model';
 export interface CartItem {
   product: string | Product; // populated or just id
   quantity: number;
-
   // 🔥 Snapshot at the time of addition
   priceAtAdd: number;
 

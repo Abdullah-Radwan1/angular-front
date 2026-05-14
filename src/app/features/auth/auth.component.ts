@@ -2,8 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoginRequest, RegisterRequest } from '../../shared/models';
+import { RegisterRequest } from '../../shared/models/api-response-model';
 import { AuthStore } from '../../store/auth.store';
+import { NotificationService } from '../../shared/services/notification.service';
 import {
   LucideLock,
   LucideLogIn,
@@ -37,6 +38,8 @@ export class AuthComponent {
   isLoading = signal(false);
   authForm: FormGroup;
   readonly authStore = inject(AuthStore);
+  readonly notification = inject(NotificationService);
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -81,7 +84,10 @@ export class AuthComponent {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.authForm.invalid) return;
+    if (this.authForm.invalid) {
+      this.notification.error('Please fill in all required fields correctly');
+      return;
+    }
 
     this.isLoading.set(true);
 
@@ -89,10 +95,10 @@ export class AuthComponent {
       const formValue = this.authForm.value;
       if (this.isLoginMode()) {
         await this.authStore.login({
-          email: formValue.identifier,
+          identifier: formValue.identifier,
           password: formValue.password,
-          phone: formValue.identifier, // Send as both to be safe with backend extraction
-        } as LoginRequest);
+        });
+        this.notification.success('Welcome back!');
       } else {
         const registerData: RegisterRequest = {
           name: `${formValue.firstName} ${formValue.lastName}`,
@@ -100,12 +106,27 @@ export class AuthComponent {
           phone: formValue.phone || undefined,
           password: formValue.password,
         };
+
         await this.authStore.register(registerData);
+        this.notification.success('Account created successfully!');
       }
-    } catch (error) {
-      // Error handled in service
+    } catch (error: any) {
+      const message = error.error?.message || 'Authentication failed';
+      this.notification.error(message);
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.authForm.get(controlName);
+    if (!control || !control.errors || !control.touched) return '';
+
+    if (control.errors['required']) return 'This field is required';
+    if (control.errors['email']) return 'Invalid email address';
+    if (control.errors['minlength']) {
+      return `Minimum ${control.errors['minlength'].requiredLength} characters required`;
+    }
+    return 'Invalid field';
   }
 }

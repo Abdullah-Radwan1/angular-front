@@ -1,0 +1,184 @@
+<div class="min-h-screen bg-gradient-to-br from-base-200/50 to-base-100">
+  <div class="container mx-auto px-4 py-12 max-w-5xl">
+    <!-- Header -->
+    <div class="mb-12 animate-fade-in">
+      <div class="flex items-center gap-3 mb-2">
+        <div
+          class="badge badge-primary badge-lg rounded-2xl gap-2 font-black uppercase tracking-tighter"
+        >
+          <svg lucideHistory class="w-3 h-3"></svg>
+          History
+        </div>
+      </div>
+      <h1
+        class="text-4xl lg:text-6xl font-black tracking-tight bg-gradient-to-r from-base-content to-base-content/70 bg-clip-text text-transparent"
+      >
+        Refund Requests
+      </h1>
+      <p class="text-base-content/50 mt-4 text-lg">Track the status of your refund applications</p>
+    </div>
+
+    @if (isLoading()) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+        <p class="mt-4 font-bold opacity-50">Syncing your requests...</p>
+      </div>
+    } @else if (refunds().length > 0) {
+      <div class="grid gap-6">
+        @for (refund of refunds(); track refund._id) {
+          <div
+            class="card bg-base-100 border border-base-200 shadow-sm rounded-[2.5rem] overflow-hidden hover:shadow-xl transition-all duration-500 group animate-slide-up"
+          >
+            <div class="p-8">
+              <div class="flex flex-col lg:flex-row justify-between gap-8">
+                <!-- Info Section -->
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-6">
+                    <span
+                      class="badge {{
+                        getStatusClass(refund.status)
+                      }} px-4 py-3 rounded-xl font-black uppercase tracking-tighter text-[10px]"
+                    >
+                      @if (refund.status === 'pending') {
+                        <svg lucideClock class="w-3 h-3 mr-1"></svg>
+                      }
+                      @if (refund.status === 'approved') {
+                        <svg lucideCheckCircle class="w-3 h-3 mr-1"></svg>
+                      }
+                      @if (refund.status === 'rejected') {
+                        <svg lucideXCircle class="w-3 h-3 mr-1"></svg>
+                      }
+                      {{ refund.status }}
+                    </span>
+                    <span class="text-xs font-mono opacity-30 select-all"
+                      >REF#{{ refund._id }}</span
+                    >
+                  </div>
+
+                  <div class="space-y-4">
+                    <div class="flex items-start gap-4">
+                      <div
+                        class="w-12 h-12 bg-base-200 rounded-2xl flex items-center justify-center shrink-0"
+                      >
+                        <svg lucideInfo class="w-6 h-6 opacity-30"></svg>
+                      </div>
+                      <div>
+                        <div class="text-xs font-black uppercase tracking-widest opacity-30 mb-1">
+                          Reason for refund
+                        </div>
+                        <p class="font-bold text-lg leading-tight">"{{ refund.reason }}"</p>
+                      </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-8 pt-4 border-t border-base-200/50">
+                      <div>
+                        <div
+                          class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1"
+                        >
+                          Requested On
+                        </div>
+                        <div class="font-bold">{{ refund.createdAt | date: 'longDate' }}</div>
+                      </div>
+                      <div>
+                        <div
+                          class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-1"
+                        >
+                          Linked Order
+                        </div>
+                        <div
+                          class="font-bold text-primary underline decoration-2 underline-offset-4 cursor-pointer"
+                        >
+                          #{{ refund.order?._id?.slice(-8) || refund.order }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status Visual -->
+                <div
+                  class="lg:w-48 flex flex-col justify-center items-center text-center p-6 bg-base-200/50 rounded-3xl border border-base-200 group-hover:bg-base-200 transition-colors"
+                >
+                  @if (refund.status === 'pending') {
+                    <div
+                      class="w-12 h-12 bg-warning/20 text-warning rounded-full flex items-center justify-center mb-3 animate-pulse"
+                    >
+                      <svg lucideClock class="w-6 h-6"></svg>
+                    </div>
+                    <div class="text-xs font-black uppercase tracking-widest">Awaiting Review</div>
+                  } @else if (refund.status === 'approved') {
+                    <div
+                      class="w-12 h-12 bg-success/20 text-success rounded-full flex items-center justify-center mb-3"
+                    >
+                      <svg lucideCheckCircle class="w-6 h-6"></svg>
+                    </div>
+                    <div class="text-xs font-black uppercase tracking-widest">Funds Released</div>
+                  } @else {
+                    <div
+                      class="w-12 h-12 bg-error/20 text-error rounded-full flex items-center justify-center mb-3"
+                    >
+                      <svg lucideAlertCircle class="w-6 h-6"></svg>
+                    </div>
+                    <div class="text-xs font-black uppercase tracking-widest">Request Denied</div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="flex justify-center mt-12 animate-fade-in">
+          <div class="join bg-base-100 shadow-sm border border-base-200 p-1 rounded-2xl">
+            <button 
+              class="join-item btn btn-sm btn-ghost rounded-xl" 
+              [disabled]="currentPage() === 1" 
+              (click)="changePage(currentPage() - 1)">
+              <svg lucideChevronLeft class="w-4 h-4"></svg>
+            </button>
+            
+            @for (page of pages(); track page) {
+              <button 
+                class="join-item btn btn-sm rounded-xl px-4 font-bold" 
+                [class.btn-primary]="page === currentPage()" 
+                [class.btn-ghost]="page !== currentPage()" 
+                (click)="changePage(page)">
+                {{ page }}
+              </button>
+            }
+            
+            <button 
+              class="join-item btn btn-sm btn-ghost rounded-xl" 
+              [disabled]="currentPage() === totalPages()" 
+              (click)="changePage(currentPage() + 1)">
+              <svg lucideChevronRight class="w-4 h-4"></svg>
+            </button>
+          </div>
+        </div>
+      }
+    } @else {
+      <div
+        class="card bg-base-100 border border-base-200 shadow-sm rounded-[3rem] p-20 text-center animate-scale-up"
+      >
+        <div
+          class="w-24 h-24 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-8"
+        >
+          <svg lucideHistory class="w-10 h-10 opacity-20"></svg>
+        </div>
+        <h2 class="text-3xl font-black mb-4">No refund history</h2>
+        <p class="text-base-content/50 max-w-md mx-auto mb-10 text-lg">
+          You haven't requested any refunds yet. If you have an issue with an order, you can start a
+          request from your order details.
+        </p>
+        <button
+          routerLink="/orders"
+          class="btn btn-primary btn-lg rounded-2xl px-12 font-black uppercase tracking-tighter"
+        >
+          View My Orders
+        </button>
+      </div>
+    }
+  </div>
+</div>

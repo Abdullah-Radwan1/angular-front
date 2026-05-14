@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
-<<<<<<< HEAD
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
+import { AuthenticatedGuard } from './core/guards/authenticated.guard';
 
 export const routes: Routes = [
   {
@@ -11,11 +11,12 @@ export const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.authRoutes),
+    canActivate: [AuthenticatedGuard],
   },
   {
     path: 'testimonials',
 
-    loadChildren: () =>
+    loadComponent: () =>
       import('./features/testimonial/testimonial').then((m) => m.TestimonialComponent),
   },
   {
@@ -33,7 +34,6 @@ export const routes: Routes = [
   {
     path: 'cart',
     loadChildren: () => import('./features/cart/cart.routes').then((m) => m.cartRoutes),
-    canActivate: [AuthGuard],
   },
   {
     path: 'checkout',
@@ -42,8 +42,12 @@ export const routes: Routes = [
   },
   {
     path: 'orders',
-
     loadChildren: () => import('./features/orders/orders.routes').then((m) => m.ordersRoutes),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'refunds',
+    loadChildren: () => import('./features/refunds/refunds.routes').then((m) => m.REFUND_ROUTES),
     canActivate: [AuthGuard],
   },
 
@@ -67,30 +71,5 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: '',
-=======
-import { Home } from './features/home/home';
-import { SkillsComponent } from './features/skills/skills';
-import { ProjectsComponent } from './features/projects/projects';
-import { ExperienceComponent } from './features/experience/experience';
-import { DashboardComponent } from './dashboard/dashboard.component';
-
-export const routes: Routes = [
-  { path: '', component: Home }, // "/" → Home
-  {
-    path: 'projects',
-    component: ProjectsComponent,
-  },
-  {
-    path: 'experience',
-    component: ExperienceComponent,
-  },
-  {
-    path: 'dashboard',
-    component: DashboardComponent,
-  },
-  {
-    path: 'skills',
-    component: SkillsComponent,
->>>>>>> ad21ca7f608955e0942e7442e6a004e1e81683c6
   },
 ];

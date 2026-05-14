@@ -23,9 +23,11 @@ export interface Product {
 
   imageUrl: string;
   price: number;
+  oldPrice?: number;
+  isPriceChanged?: boolean;
 
   category: Category;
-
+  isActive?: boolean;
   variants: ProductVariant[];
 
   tags?: string[];

@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideQuote, LucideStar } from '@lucide/angular';
 import { TestimonialService } from '../../services/testimonial.service';
-import { Testimonial } from '../../models';
+import { Testimonial } from '../../models/api-response-model';
 
 @Component({
   selector: 'app-testimonials',
@@ -27,20 +27,26 @@ import { Testimonial } from '../../models';
           }
         } @else {
           @for (testimonial of testimonials(); track testimonial._id) {
-            <div class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all duration-300 rounded-3xl p-6 group">
+            <div
+              class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-all duration-300 rounded-3xl p-6 group"
+            >
               <div class="flex flex-col h-full justify-between gap-4">
                 <div class="space-y-3">
                   <!-- Rating -->
                   <div class="flex gap-1">
                     @for (star of [1, 2, 3, 4, 5]; track star) {
-                      <svg 
-                        lucideStar 
-                        [size]="14" 
-                        [class]="star <= testimonial.rating ? 'fill-warning text-warning' : 'text-base-content/20'"
+                      <svg
+                        lucideStar
+                        [size]="14"
+                        [class]="
+                          star <= testimonial.rating
+                            ? 'fill-warning text-warning'
+                            : 'text-base-content/20'
+                        "
                       ></svg>
                     }
                   </div>
-                  
+
                   <!-- Content -->
                   <p class="text-base-content/80 italic leading-relaxed">
                     "{{ testimonial.content }}"
@@ -49,34 +55,42 @@ import { Testimonial } from '../../models';
 
                 <!-- User info -->
                 <div class="flex items-center gap-3 pt-4 border-t border-base-200">
-                  <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                  <div
+                    class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold"
+                  >
                     {{ testimonial.user.name.charAt(0) }}
                   </div>
                   <div>
                     <h4 class="font-bold text-sm">{{ testimonial.user.name }}</h4>
-                    <p class="text-[10px] uppercase tracking-widest opacity-50">Verified Customer</p>
+                    <p class="text-[10px] uppercase tracking-widest opacity-50">
+                      Verified Customer
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           } @empty {
-             <div class="col-span-full py-12 text-center bg-base-200 rounded-3xl">
-                <p class="text-base-content/40 italic">No testimonials yet. Be the first to share your experience!</p>
-             </div>
+            <div class="col-span-full py-12 text-center bg-base-200 rounded-3xl">
+              <p class="text-base-content/40 italic">
+                No testimonials yet. Be the first to share your experience!
+              </p>
+            </div>
           }
         }
       </div>
     </section>
   `,
-  styles: [`
-    :host {
-      display: block;
-    }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+    `,
+  ],
 })
 export class TestimonialsComponent implements OnInit {
   private testimonialService = inject(TestimonialService);
-  
+
   testimonials = signal<Testimonial[]>([]);
   isLoading = signal(true);
 
@@ -92,7 +106,7 @@ export class TestimonialsComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-      }
+      },
     });
   }
 }

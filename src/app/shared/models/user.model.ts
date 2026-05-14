@@ -5,5 +5,6 @@ export interface User {
   email?: string;
   phone?: string;
   role: 'user' | 'admin';
+  isDeleted?: boolean;
   createdAt?: string | Date;
 }

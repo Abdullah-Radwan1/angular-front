@@ -8,10 +8,10 @@
         <div class="p-3 bg-primary/10 rounded-2xl text-primary">
           <svg lucidePackage [size]="32"></svg>
         </div>
-        <h2 class="text-3xl font-black tracking-tight text-base-content">
+        <h2 class="text-3xl font-black tracking-tight text-base-content text-center">
           {{ isLoginMode() ? 'Welcome Back' : 'Join Luxury Home' }}
         </h2>
-        <p class="text-sm text-base-content/60">
+        <p class="text-sm text-base-content/60 text-center">
           {{
             isLoginMode()
               ? 'Enter your credentials to access your account'
@@ -24,109 +24,137 @@
         @if (!isLoginMode()) {
           <div class="grid grid-cols-2 gap-4">
             <div class="form-control">
-              <label class="label pb-1"
-                ><span class="label-text font-bold text-xs uppercase opacity-60"
-                  >First Name</span
-                ></label
-              >
+              <label class="label pb-1">
+                <span class="label-text font-bold text-xs uppercase opacity-60">First Name</span>
+              </label>
               <div class="relative">
-                <span class="absolute inset-y-0 left-3 flex items-center opacity-40"
-                  ><svg lucideUser [size]="16"></svg
-                ></span>
+                <span class="absolute inset-y-0 left-3 flex items-center opacity-40">
+                  <svg lucideUser [size]="16"></svg>
+                </span>
                 <input
                   type="text"
                   formControlName="firstName"
                   class="input input-bordered w-full focus:input-primary"
+                  [class.input-error]="getErrorMessage('firstName')"
                   placeholder="John"
                 />
               </div>
+              @if (getErrorMessage('firstName')) {
+                <span class="text-md text-error mt-1 px-1">{{ getErrorMessage('firstName') }}</span>
+              }
             </div>
+
             <div class="form-control">
-              <label class="label pb-1"
-                ><span class="label-text font-bold text-xs uppercase opacity-60"
-                  >Last Name</span
-                ></label
-              >
+              <label class="label pb-1">
+                <span class="label-text font-bold text-xs uppercase opacity-60">Last Name</span>
+              </label>
               <input
                 type="text"
                 formControlName="lastName"
                 class="input input-bordered w-full focus:input-primary"
+                [class.input-error]="getErrorMessage('lastName')"
                 placeholder="Doe"
               />
+              @if (getErrorMessage('lastName')) {
+                <span class="text-md text-error mt-1 px-1">{{ getErrorMessage('lastName') }}</span>
+              }
             </div>
           </div>
         }
 
         <div class="form-control">
-          <label class="label pb-1"
-            ><span class="label-text font-bold text-xs uppercase opacity-60">{{
-              isLoginMode() ? 'Email or Phone' : 'Email Address'
-            }}</span></label
-          >
+          <label class="label pb-1">
+            <span class="label-text font-bold text-xs uppercase opacity-60">
+              {{ isLoginMode() ? 'Email or Phone' : 'Email Address' }}
+            </span>
+          </label>
           <div class="relative">
-            <span class="absolute inset-y-0 left-3 flex items-center opacity-40"
-              ><svg lucideMail [size]="16"></svg
-            ></span>
-            <input
-              [type]="isLoginMode() ? 'text' : 'email'"
-              [formControlName]="isLoginMode() ? 'identifier' : 'email'"
-              class="input input-bordered w-full focus:input-primary"
-              [placeholder]="isLoginMode() ? 'name@example.com or phone' : 'name@example.com'"
-            />
+            <span class="absolute inset-y-0 left-3 flex items-center opacity-40">
+              <svg lucideMail [size]="16"></svg>
+            </span>
+            @if (isLoginMode()) {
+              <input
+                type="text"
+                formControlName="identifier"
+                class="input input-bordered w-full focus:input-primary"
+                [class.input-error]="getErrorMessage('identifier')"
+                placeholder="name@example.com or phone"
+              />
+              @if (getErrorMessage('identifier')) {
+                <span class="text-md text-error mt-1 px-1">{{
+                  getErrorMessage('identifier')
+                }}</span>
+              }
+            } @else {
+              <input
+                type="email"
+                formControlName="email"
+                class="input input-bordered w-full focus:input-primary"
+                [class.input-error]="getErrorMessage('email')"
+                placeholder="name@example.com"
+              />
+              @if (getErrorMessage('email')) {
+                <span class="text-md text-error mt-1 px-1">{{ getErrorMessage('email') }}</span>
+              }
+            }
           </div>
         </div>
 
         @if (!isLoginMode()) {
           <div class="form-control">
-            <label class="label pb-1"
-              ><span class="label-text font-bold text-xs uppercase opacity-60"
-                >Phone Number</span
-              ></label
-            >
+            <label class="label pb-1">
+              <span class="label-text font-bold text-xs uppercase opacity-60">Phone Number</span>
+            </label>
             <div class="relative">
-              <span class="absolute inset-y-0 left-3 flex items-center opacity-40"
-                ><svg lucidePhone [size]="16"></svg
-              ></span>
+              <span class="absolute inset-y-0 left-3 flex items-center opacity-40">
+                <svg lucidePhone [size]="16"></svg>
+              </span>
               <input
                 type="text"
                 formControlName="phone"
                 class="input input-bordered w-full focus:input-primary"
+                [class.input-error]="getErrorMessage('phone')"
                 placeholder="0123456789"
               />
             </div>
+            @if (getErrorMessage('phone')) {
+              <span class="text-md text-error mt-1 px-1">{{ getErrorMessage('phone') }}</span>
+            }
           </div>
         }
 
         <div class="form-control">
           <div class="flex justify-between items-center">
-            <label class="label pb-1"
-              ><span class="label-text font-bold text-xs uppercase opacity-60"
-                >Password</span
-              ></label
-            >
+            <label class="label pb-1">
+              <span class="label-text font-bold text-xs uppercase opacity-60">Password</span>
+            </label>
             @if (isLoginMode()) {
-              <a href="#" class="text-[10px] uppercase font-bold text-primary hover:underline"
+              <a href="#" class="text-md uppercase font-bold text-primary hover:underline"
                 >Forgot?</a
               >
             }
           </div>
           <div class="relative">
-            <span class="absolute inset-y-0 left-3 flex items-center opacity-40"
-              ><svg lucideLock [size]="16"></svg
-            ></span>
+            <span class="absolute inset-y-0 left-3 flex items-center opacity-40">
+              <svg lucideLock [size]="16"></svg>
+            </span>
             <input
               type="password"
               formControlName="password"
               class="input input-bordered w-full focus:input-primary"
+              [class.input-error]="getErrorMessage('password')"
               placeholder="••••••••"
             />
           </div>
+          @if (getErrorMessage('password')) {
+            <span class="text-md text-error mt-1 px-1">{{ getErrorMessage('password') }}</span>
+          }
         </div>
 
         <div class="form-control flex justify-center mt-8">
           <button
             type="submit"
-            class="btn btn-primary shadow-lg shadow-primary/20 gap-2 h-12 text-lg"
+            class="btn btn-primary shadow-lg shadow-primary/20 gap-2 h-12 text-lg w-full"
             [disabled]="authForm.invalid || isLoading()"
           >
             @if (isLoading()) {

@@ -7,12 +7,17 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { firstValueFrom } from 'rxjs';
 
 import { URL } from '../shared/ENV';
-
-import { User, LoginRequest, RegisterRequest, ChangePasswordRequest } from '../shared/models';
+import {
+  User,
+  LoginRequest,
+  RegisterRequest,
+  ChangePasswordRequest,
+} from '../shared/models/api-response-model';
 import { AuthResponse } from '../shared/models/auth.model';
+import { CartStore } from './cart.store';
 
 const USER_STORAGE_KEY = 'auth_user';
-
+const CART_STORAGE_KEY = 'cart';
 type AuthState = {
   user: User | null;
   loading: boolean;
@@ -39,6 +44,7 @@ export const AuthStore = signalStore(
   withMethods((store) => {
     const http = inject(HttpClient);
     const router = inject(Router);
+    const cartStore = inject(CartStore);
 
     return {
       // ------------------------------------------------------
@@ -50,9 +56,9 @@ export const AuthStore = signalStore(
         patchState(store, { loading: true });
 
         try {
-          // 1. Set the type to <any> or a Response interface to handle the wrapper object
+          // 1. Backend returns AuthResponse { user, token }
           const response = await firstValueFrom(
-            http.post<{ user: AuthResponse }>(`${URL}/auth/login`, credentials, {
+            http.post<AuthResponse>(`${URL}/auth/login`, credentials, {
               withCredentials: true,
             }),
           );
@@ -63,9 +69,12 @@ export const AuthStore = signalStore(
           localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
 
           patchState(store, {
-            user: userData.user, // Store the clean User object
+            user: userData,
             loading: false,
           });
+
+          // 3. Merge Cart
+          await cartStore.mergeCartWithServer();
 
           await router.navigate(['/']);
         } catch (error) {
@@ -78,9 +87,9 @@ export const AuthStore = signalStore(
         patchState(store, { loading: true });
 
         try {
-          // 1. Use the same extraction logic for Register
+          // 1. Backend returns AuthResponse { user, token }
           const response = await firstValueFrom(
-            http.post<{ user: User }>(`${URL}/auth/register`, data, {
+            http.post<AuthResponse>(`${URL}/auth/register`, data, {
               withCredentials: true,
             }),
           );
@@ -93,6 +102,9 @@ export const AuthStore = signalStore(
             user: userData,
             loading: false,
           });
+
+          // 3. Merge Cart
+          await cartStore.mergeCartWithServer();
 
           await router.navigate(['/']);
         } catch (error) {
@@ -149,6 +161,7 @@ export const AuthStore = signalStore(
         } catch {}
 
         localStorage.removeItem(USER_STORAGE_KEY);
+        localStorage.removeItem(CART_STORAGE_KEY);
 
         patchState(store, {
           user: null,

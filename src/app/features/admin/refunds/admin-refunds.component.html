@@ -1,64 +1,156 @@
-<div class="container mx-auto px-4 py-8">
-  <h1 class="text-4xl font-bold mb-8">Manage Refunds</h1>
-
-  <div class="overflow-x-auto">
-    <table class="table table-zebra w-full">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Order ID</th>
-          <th>User ID</th>
-          <th>Amount</th>
-          <th>Reason</th>
-          <th>Status</th>
-          <th>Created</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (refund of refunds(); track refund.id) {
-          <tr>
-            <td>{{ refund.id }}</td>
-            <td>{{ refund._id }}</td>
-            <td>{{ refund.user[0] }}</td>
-            <td>${{ refund.order }}</td>
-            <td>{{ refund.reason }}</td>
-            <td>
-              <span
-                class="badge"
-                [ngClass]="{
-                  'badge-warning': refund.status === 'pending',
-                  'badge-info': refund.status === 'approved',
-                  'badge-error': refund.status === 'rejected',
-                }"
-              >
-                {{ refund.status }}
-              </span>
-            </td>
-            <td>{{ refund.createdAt | date: 'short' }}</td>
-            <td>
-              @if (refund.status === 'pending') {
-                <div class="flex gap-2">
-                  <button
-                    class="btn btn-sm btn-success"
-                    (click)="updateRefundStatus(refund, 'approved')"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    class="btn btn-sm btn-error"
-                    (click)="updateRefundStatus(refund, 'rejected')"
-                  >
-                    Reject
-                  </button>
-                </div>
-              } @else {
-                <span class="text-sm opacity-70">No actions</span>
-              }
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+<div class="container mx-auto px-4 py-12">
+  <div class="flex justify-between items-center mb-10">
+    <div>
+      <h1 class="text-4xl font-black tracking-tight">Refund Requests</h1>
+      <p class="text-base-content/50 mt-1">Manage and process customer refund requests</p>
+    </div>
+    <div class="badge badge-lg badge-neutral gap-2 p-4 rounded-xl">
+      <span class="font-bold">{{ totalResult() }}</span>
+      <span class="opacity-50 text-xs uppercase tracking-widest">Total Requests</span>
+    </div>
   </div>
+
+  <div class="card bg-base-100 border border-base-200 shadow-sm rounded-3xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="table table-lg w-full">
+        <thead>
+          <tr class="bg-base-200/50">
+            <th class="text-xs uppercase tracking-widest opacity-50">Customer</th>
+            <th class="text-xs uppercase tracking-widest opacity-50">Order Details</th>
+            <th class="text-xs uppercase tracking-widest opacity-50">Reason</th>
+            <th class="text-xs uppercase tracking-widest opacity-50">Requested On</th>
+            <th class="text-xs uppercase tracking-widest opacity-50">Status</th>
+            <th class="text-xs uppercase tracking-widest opacity-50 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-base-200">
+          @for (refund of refunds(); track refund._id) {
+            <tr class="hover:bg-base-200/30 transition-colors">
+              <td>
+                <div class="flex items-center gap-3">
+                  <div class="avatar placeholder">
+                    <div class="bg-primary text-primary-content rounded-xl w-10">
+                      <span class="text-xs font-bold">{{
+                        refund.user?.name?.charAt(0) || 'U'
+                      }}</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="font-black text-sm">{{ refund.user.name || 'Unknown' }}</div>
+                    <div class="text-xs opacity-50">{{ refund.user.email || 'No email' }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="font-mono text-xs opacity-50 mb-1">
+                  #{{ refund.order._id || refund.order }}
+                </div>
+                <div class="font-bold text-sm text-primary">
+                  {{ refund.order.totalPrice | number }} EGP
+                </div>
+              </td>
+              <td class="max-w-xs whitespace-normal">
+                <p class="text-sm italic opacity-70">"{{ refund.reason }}"</p>
+              </td>
+              <td class="text-sm opacity-60">
+                {{ refund.createdAt | date: 'MMM d, yyyy' }}
+              </td>
+              <td>
+                <span
+                  class="badge badge-sm font-bold rounded-lg uppercase tracking-tighter"
+                  [ngClass]="{
+                    'badge-warning': refund.status === 'pending',
+                    'badge-success': refund.status === 'approved',
+                    'badge-error': refund.status === 'rejected',
+                  }"
+                >
+                  {{ refund.status }}
+                </span>
+              </td>
+              <td>
+                <div class="flex justify-end gap-2">
+                  @if (refund.status === 'pending') {
+                    <button
+                      (click)="updateRefundStatus(refund._id!, 'approved')"
+                      class="btn btn-sm btn-success rounded-xl gap-2 font-bold"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      (click)="updateRefundStatus(refund._id!, 'rejected')"
+                      class="btn btn-sm btn-outline btn-error rounded-xl gap-2 font-bold"
+                    >
+                      Reject
+                    </button>
+                  } @else {
+                    <span class="text-xs opacity-30 font-bold uppercase tracking-widest"
+                      >Processed</span
+                    >
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (refunds().length === 0 && !isLoading()) {
+      <div class="py-20 text-center">
+        <div
+          class="bg-base-200 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            class="opacity-20"
+          >
+            <path d="M3 7h18" />
+            <path d="M6 10V5c0-1.1.9-2 2-2h8c1.1 0 2 .9 2 2v5" />
+            <path d="M3 13h18" />
+            <path d="M6 16v5c0 1.1.9 2 2 2h8c1.1 0 2-0.9 2-2v-5" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold">No refund requests</h3>
+        <p class="text-base-content/50">All caught up! No pending refunds found.</p>
+      </div>
+    }
+  </div>
+
+  <!-- Pagination -->
+  @if (totalPages() > 1) {
+    <div class="flex justify-center mt-12">
+      <div class="join bg-base-100 shadow-sm border border-base-200 p-1 rounded-2xl">
+        <button
+          class="join-item btn btn-sm btn-ghost rounded-xl"
+          [disabled]="currentPage() === 1"
+          (click)="changePage(currentPage() - 1)"
+        >
+          «
+        </button>
+        @for (page of pages(); track page) {
+          <button
+            class="join-item btn btn-sm rounded-xl px-4 font-bold"
+            [class.btn-primary]="page === currentPage()"
+            [class.btn-ghost]="page !== currentPage()"
+            (click)="changePage(page)"
+          >
+            {{ page }}
+          </button>
+        }
+        <button
+          class="join-item btn btn-sm btn-ghost rounded-xl"
+          [disabled]="currentPage() === totalPages()"
+          (click)="changePage(currentPage() + 1)"
+        >
+          »
+        </button>
+      </div>
+    </div>
+  }
 </div>

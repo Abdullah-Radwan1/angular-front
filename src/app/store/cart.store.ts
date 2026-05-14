@@ -13,7 +13,7 @@ import { firstValueFrom, Subject, debounceTime } from 'rxjs';
 import { URL } from '../shared/ENV';
 import { NotificationService } from '../shared/services/notification.service';
 
-import { Product, CartItem as SharedCartItem } from '../shared/models';
+import { Product, CartItem as SharedCartItem } from '../shared/models/api-response-model';
 
 export type CartItem = SharedCartItem & { product: Product };
 
@@ -43,11 +43,17 @@ const getInitialState = (): CartState => {
 };
 
 const initialState: CartState = getInitialState();
-console.log(initialState);
 const saveCart = (cart: CartItem[]) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('cart', JSON.stringify(cart));
   }
+};
+
+const isAuthenticated = () => {
+  if (typeof window !== 'undefined') {
+    return !!localStorage.getItem('auth_user');
+  }
+  return false;
 };
 
 export const CartStore = signalStore(
@@ -81,6 +87,7 @@ export const CartStore = signalStore(
 
     // 🚀 2. Private API callers
     const _sendUpdate = async (productId: string, quantity: number) => {
+      if (!isAuthenticated()) return;
       try {
         await firstValueFrom(
           http.post(`${URL}/cart/add`, { productId, quantity }, { withCredentials: true }),
@@ -92,6 +99,7 @@ export const CartStore = signalStore(
     };
 
     const _sendRemove = async (productId: string) => {
+      if (!isAuthenticated()) return;
       try {
         await firstValueFrom(http.delete(`${URL}/cart/${productId}`, { withCredentials: true }));
         notification.success('Item removal synced');
@@ -115,21 +123,25 @@ export const CartStore = signalStore(
       }
     });
 
+    // 🚀 4. Internal Methods (to allow calling each other)
+    const loadCart = async () => {
+      if (!isAuthenticated()) return;
+      patchState(store, { loading: true });
+      try {
+        const res: any = await firstValueFrom(http.get(`${URL}/cart`, { withCredentials: true }));
+        const items = res?.items ?? [];
+        patchState(store, { cart: items, loading: false });
+        saveCart(items);
+      } catch {
+        patchState(store, { loading: false });
+      }
+    };
+
     return {
       // ------------------------------------------------------
       // LOAD CART
       // ------------------------------------------------------
-      loadCart: async () => {
-        patchState(store, { loading: true });
-        try {
-          const res: any = await firstValueFrom(http.get(`${URL}/cart`, { withCredentials: true }));
-          const items = res?.items ?? [];
-          patchState(store, { cart: items, loading: false });
-          saveCart(items);
-        } catch {
-          patchState(store, { loading: false });
-        }
-      },
+      loadCart,
 
       // ------------------------------------------------------
       // ADD TO CART (DEBOUNCED)
@@ -188,6 +200,7 @@ export const CartStore = signalStore(
       // SYNC PRICES
       // ------------------------------------------------------
       syncPrices: async () => {
+        if (!isAuthenticated()) return;
         try {
           const res: any = await firstValueFrom(
             http.put(`${URL}/cart/sync`, {}, { withCredentials: true }),
@@ -207,6 +220,7 @@ export const CartStore = signalStore(
       clearCart: async () => {
         patchState(store, { cart: [] });
         saveCart([]);
+        if (!isAuthenticated()) return;
         try {
           const res: any = await firstValueFrom(
             http.delete(`${URL}/cart/clear`, { withCredentials: true }),
@@ -219,6 +233,41 @@ export const CartStore = signalStore(
           notification.error('Failed to clear cart');
         }
       },
+
+      // ------------------------------------------------------
+      // MERGE GUEST CART
+      // ------------------------------------------------------
+      mergeCartWithServer: async () => {
+        const currentCart = store.cart();
+        if (currentCart.length === 0) {
+          // If local cart is empty, just load the server cart
+          await loadCart();
+          return;
+        }
+
+        try {
+          const res: any = await firstValueFrom(
+            http.post(`${URL}/cart/merge`, { items: currentCart }, { withCredentials: true }),
+          );
+          // After merge, server returns the full merged cart
+          const items = res?.items ?? [];
+          patchState(store, { cart: items });
+          saveCart(items);
+          notification.success('Cart merged with your account');
+        } catch (err) {
+          console.error('Failed to merge cart', err);
+          // Fallback to just loading server cart if merge fails
+          await loadCart();
+        }
+      },
     };
+  }),
+
+  withHooks({
+    onInit(store) {
+      if (isAuthenticated()) {
+        store.loadCart();
+      }
+    },
   }),
 );

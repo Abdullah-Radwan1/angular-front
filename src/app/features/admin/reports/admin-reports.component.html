@@ -1,0 +1,109 @@
+<div class="container mx-auto px-4 py-12">
+  <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-12">
+    <div>
+      <h1 class="text-4xl lg:text-6xl font-black tracking-tight">Business Intelligence</h1>
+      <p class="text-base-content/50 mt-2 text-lg">Performance metrics and sales insights</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-4 bg-base-200 p-4 rounded-[2rem] border border-base-300">
+      <div class="flex flex-col">
+        <span class="text-[10px] font-black uppercase tracking-widest opacity-30 ml-2 mb-1">Start Date</span>
+        <input type="date" [(ngModel)]="startDate" (change)="fetchReport()" 
+          class="input input-sm rounded-xl font-bold bg-base-100" />
+      </div>
+      <div class="flex flex-col">
+        <span class="text-[10px] font-black uppercase tracking-widest opacity-30 ml-2 mb-1">End Date</span>
+        <input type="date" [(ngModel)]="endDate" (change)="fetchReport()" 
+          class="input input-sm rounded-xl font-bold bg-base-100" />
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex flex-col items-center justify-center py-32">
+      <span class="loading loading-spinner loading-lg text-primary"></span>
+      <p class="mt-4 font-black uppercase tracking-widest opacity-30">Generating Report...</p>
+    </div>
+  } @else if (reportData()) {
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+      @let stats = reportData().overallStats[0];
+      <div class="card bg-primary text-primary-content rounded-[3rem] p-10 shadow-xl shadow-primary/20 overflow-hidden relative group">
+        <div class="relative z-10">
+          <div class="text-xs font-black uppercase tracking-widest opacity-70 mb-4">Total Revenue</div>
+          <div class="text-5xl font-black mb-2">{{ formatCurrency(stats?.totalRevenue || 0) }}</div>
+          <div class="text-sm opacity-70">From {{ stats?.totalOrders || 0 }} completed orders</div>
+        </div>
+        <div class="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
+          <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 border border-base-200 rounded-[3rem] p-10 shadow-sm relative group">
+        <div class="text-xs font-black uppercase tracking-widest opacity-30 mb-4 text-primary">Avg Order Value</div>
+        <div class="text-5xl font-black mb-2">{{ formatCurrency(stats?.avgOrderValue || 0) }}</div>
+        <p class="text-sm opacity-50 italic">Per transaction average</p>
+      </div>
+
+      <div class="card bg-neutral text-neutral-content rounded-[3rem] p-10 shadow-xl relative group">
+        <div class="text-xs font-black uppercase tracking-widest opacity-30 mb-4">Success Rate</div>
+        <div class="text-5xl font-black mb-2">94.2%</div>
+        <p class="text-sm opacity-50">Estimated operational efficiency</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <!-- Top Products -->
+      <section>
+        <h3 class="text-2xl font-black mb-8 flex items-center gap-3">
+          <span class="w-8 h-8 bg-base-200 rounded-xl flex items-center justify-center text-sm">01</span>
+          Best Selling Pieces
+        </h3>
+        <div class="space-y-4">
+          @for (product of reportData().topProducts; track product._id) {
+            <div class="flex items-center gap-6 p-4 bg-base-100 border border-base-200 rounded-3xl group hover:border-primary/30 transition-all">
+              <div class="w-20 h-20 bg-base-200 rounded-2xl overflow-hidden shrink-0">
+                <img [src]="product.imageUrl" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              </div>
+              <div class="flex-1">
+                <h4 class="font-black text-lg">{{ product.name }}</h4>
+                <p class="text-xs font-black uppercase tracking-widest opacity-30">{{ product.totalSold }} units sold</p>
+              </div>
+              <div class="text-right">
+                <div class="font-black text-lg">{{ formatCurrency(product.revenue) }}</div>
+                <div class="badge badge-success badge-sm font-bold rounded-lg text-[10px] uppercase">Trending</div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Status Distribution -->
+      <section>
+        <h3 class="text-2xl font-black mb-8 flex items-center gap-3">
+          <span class="w-8 h-8 bg-base-200 rounded-xl flex items-center justify-center text-sm">02</span>
+          Order Distribution
+        </h3>
+        <div class="grid gap-4">
+          @for (status of reportData().ordersByStatus; track status._id) {
+            <div class="bg-base-200/50 p-8 rounded-[2.5rem] border border-base-200 relative overflow-hidden">
+              <div class="relative z-10 flex justify-between items-end">
+                <div>
+                  <div class="text-xs font-black uppercase tracking-widest opacity-30 mb-2">{{ status._id }}</div>
+                  <div class="text-4xl font-black">{{ status.count }}</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-black opacity-50 mb-1">Revenue</div>
+                  <div class="font-black">{{ formatCurrency(status.revenue) }}</div>
+                </div>
+              </div>
+              <div class="absolute right-0 bottom-0 top-0 w-1 bg-primary opacity-20" 
+                [style.height.%]="(status.count / reportData().overallStats[0]?.totalOrders) * 100"></div>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  }
+</div>

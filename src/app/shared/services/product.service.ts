@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, shareReplay } from 'rxjs';
 import { ApiService } from './api.service';
-import { Product } from '../models';
+import { Product } from '../models/api-response-model';
 
 @Injectable({
   providedIn: 'root',

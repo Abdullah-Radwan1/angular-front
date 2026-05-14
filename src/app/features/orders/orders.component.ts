@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../shared/services/api.service';
-import { Order, OrdersResponse } from '../../shared/models';
+import { NotificationService } from '../../shared/services/notification.service';
+import { Order, OrdersResponse } from '../../shared/models/api-response-model';
 import {
   LucideCircleX,
   LucidePackage,
@@ -44,11 +45,17 @@ import {
 })
 export class OrdersComponent implements OnInit {
   private readonly apiService = inject(ApiService);
+  private readonly notificationService = inject(NotificationService);
 
   // Signals for state management
   orders = signal<Order[]>([]);
   isLoading = signal(false);
   expandedOrderId = signal<string | null>(null);
+  
+  // Refund Modal State
+  isRefundModalOpen = signal(false);
+  selectedOrderForRefund = signal<Order | null>(null);
+  refundReason = signal('');
 
   // Pagination signals
   currentPage = signal(1);
@@ -174,5 +181,40 @@ export class OrdersComponent implements OnInit {
 
   refreshOrders(): void {
     this.loadOrders();
+  }
+
+  requestRefund(order: Order): void {
+    this.selectedOrderForRefund.set(order);
+    this.refundReason.set('');
+    this.isRefundModalOpen.set(true);
+  }
+
+  closeRefundModal(): void {
+    this.isRefundModalOpen.set(false);
+    this.selectedOrderForRefund.set(null);
+  }
+
+  submitRefund(): void {
+    const order = this.selectedOrderForRefund();
+    const reason = this.refundReason();
+
+    if (!order) return;
+    
+    if (!reason || reason.trim() === '') {
+      this.notificationService.error('Please provide a reason for the refund');
+      return;
+    }
+
+    this.apiService.post('/refund', { orderId: order._id, reason }).subscribe({
+      next: () => {
+        this.notificationService.success('Refund request submitted successfully');
+        this.closeRefundModal();
+        this.loadOrders();
+      },
+      error: (err) => {
+        console.error('Refund error:', err);
+        this.notificationService.error(err.error?.message || 'Failed to submit refund request');
+      },
+    });
   }
 }

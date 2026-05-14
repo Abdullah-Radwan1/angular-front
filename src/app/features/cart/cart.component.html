@@ -56,23 +56,27 @@
                 </div>
               </div>
 
-              <div
-                class="flex flex-col items-center md:items-end bg-base-200/50 p-3 rounded-2xl min-w-[120px]"
-              >
-                <div class="text-primary font-black text-xl flex items-baseline gap-1">
-                  {{ item.priceAtAdd }}
-                  <span class="text-[10px] opacity-60">EGP</span>
-                </div>
-
-                @if (item.isPriceChanged) {
-                  <div
-                    class="flex items-center gap-1 text-warning text-[10px] font-bold uppercase tracking-tighter mt-1 bg-warning/10 px-2 py-0.5 rounded-full"
-                  >
-                    <svg lucideAlertCircle [size]="10"></svg>
-                    Updated
+                <div class="flex flex-col items-center md:items-end bg-base-200/50 p-3 rounded-2xl min-w-[120px]">
+                  @if (item.isPriceChanged) {
+                    <div class="text-xs line-through opacity-40 font-bold mb-1">
+                      {{ item.priceAtAdd | number }} EGP
+                    </div>
+                  }
+                  
+                  <div class="text-primary font-black text-xl flex items-baseline gap-1">
+                    {{ item.product.price | number }}
+                    <span class="text-[10px] opacity-60">EGP</span>
                   </div>
-                }
-              </div>
+  
+                  @if (item.isPriceChanged) {
+                    <div
+                      class="flex items-center gap-1 text-warning text-[10px] font-bold uppercase tracking-tighter mt-1 bg-warning/10 px-2 py-0.5 rounded-full animate-pulse"
+                    >
+                      <svg lucideAlertCircle [size]="10"></svg>
+                      Price Updated
+                    </div>
+                  }
+                </div>
             </div>
           </div>
 
@@ -113,10 +117,10 @@
           <p class="opacity-60 text-sm">Secure payment and fast delivery across Egypt.</p>
         </div>
         <div class="flex flex-col items-end">
-          <div class="flex items-baseline gap-2">
+          <div class="flex items-baseline text-white gap-2">
             <span class="opacity-50 text-sm uppercase font-bold tracking-widest">Total:</span>
-            <span class="text-4xl font-black text-primary">{{ cartStore.totalPrice() }}</span>
-            <span class="text-primary font-bold">EGP</span>
+            <span class="text-4xl">{{ cartStore.totalPrice() }}</span>
+            <span class="font-bold">EGP</span>
           </div>
           <button
             routerLink="/checkout"

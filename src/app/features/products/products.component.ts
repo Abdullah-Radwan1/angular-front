@@ -1,10 +1,10 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-
+import { debounceTime } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api.service';
 import { ProductCardComponent } from '../../shared/components/product-card/product.card.component';
-import { Product } from '../../shared/models';
+import { Product, PaginatedResponse } from '../../shared/models/api-response-model';
 
 @Component({
   selector: 'app-products',
@@ -14,25 +14,24 @@ import { Product } from '../../shared/models';
 })
 export class ProductsComponent implements OnInit {
   products = signal<Product[]>([]);
+  categories = signal<{ _id: string; name: string }[]>([]);
+
+  // UI State
+  isLoading = signal(false);
+  filterForm: FormGroup;
+
+  // Pagination & Sort State
   currentPage = signal(1);
   totalPages = signal(1);
-
-  // 🔥 NEW
-  categories = signal<{ _id: string; name: string }[]>([]);
   sort = signal<string>('-createdAt');
-  isLoading = signal(false);
-
-  filterForm: FormGroup;
 
   pages = computed(() => {
     const total = this.totalPages();
     const current = this.currentPage();
     const pages: number[] = [];
-
     for (let i = Math.max(1, current - 2); i <= Math.min(total, current + 2); i++) {
       pages.push(i);
     }
-
     return pages;
   });
 
@@ -42,13 +41,12 @@ export class ProductsComponent implements OnInit {
   ) {
     this.filterForm = this.fb.group({
       category: [''],
-      size: [''],
       minPrice: [''],
       maxPrice: [''],
       search: [''],
     });
 
-    this.filterForm.valueChanges.subscribe(() => {
+    this.filterForm.valueChanges.pipe(debounceTime(500)).subscribe(() => {
       this.currentPage.set(1);
       this.loadProducts();
     });
@@ -56,13 +54,10 @@ export class ProductsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
-    this.loadCategories(); // 🔥 NEW
+    this.loadCategories();
   }
 
-  // ==========================
-  // 📦 LOAD PRODUCTS
-  // ==========================
-  private loadProducts(): void {
+  loadProducts(): void {
     this.isLoading.set(true);
     const formValue = this.filterForm.value;
 
@@ -71,15 +66,16 @@ export class ProductsComponent implements OnInit {
       limit: 12,
       sort: this.sort(),
     };
+
     if (formValue.category) params.category = formValue.category;
     if (formValue.search) params.search = formValue.search;
     if (formValue.minPrice) params.minPrice = formValue.minPrice;
     if (formValue.maxPrice) params.maxPrice = formValue.maxPrice;
 
-    this.apiService.get<any>('/products', { params }).subscribe({
+    this.apiService.get<PaginatedResponse<Product>>('/products', { params }).subscribe({
       next: (res) => {
-        this.products.set(res.products);
-        this.totalPages.set(res.pages);
+        this.products.set(res.data);
+        this.totalPages.set(res.pagination?.totalPages || 1);
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -95,24 +91,19 @@ export class ProductsComponent implements OnInit {
     this.loadProducts();
   }
 
-  // ==========================
-  // 📂 LOAD CATEGORIES
-  // ==========================
-  private loadCategories(): void {
+  loadCategories(): void {
     this.apiService.get<any>('/categories').subscribe({
       next: (res) => {
-        // ✅ FIX: Access the 'categories' property inside the response object
-        this.categories.set(res.categories);
+        this.categories.set(res.categories || res.data || []);
       },
       error: (err) => console.error(err),
     });
   }
 
-  // ==========================
-  // 🔄 PAGINATION
-  // ==========================
   changePage(page: number): void {
-    this.currentPage.set(page);
-    this.loadProducts();
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadProducts();
+    }
   }
 }

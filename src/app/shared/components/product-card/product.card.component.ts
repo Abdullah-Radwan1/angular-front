@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { Product } from '../../models';
+import { Product } from '../../models/api-response-model';
 import { CartStore } from '../../../store/cart.store';
 import { RouterLink } from '@angular/router';
 

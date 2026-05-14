@@ -18,7 +18,19 @@ export const adminRoutes: Routes = [
     loadComponent: () => import('./users/admin-users.component').then(m => m.AdminUsersComponent)
   },
   {
-    path: 'returns',
+    path: 'refunds',
     loadComponent: () => import('./refunds/admin-refunds.component').then(m => m.AdminRefundsComponent)
+  },
+  {
+    path: 'categories',
+    loadComponent: () => import('./categories/admin-categories.component').then(m => m.AdminCategoriesComponent)
+  },
+  {
+    path: 'reports',
+    loadComponent: () => import('./reports/admin-reports.component').then(m => m.AdminReportsComponent)
+  },
+  {
+    path: 'testimonials',
+    loadComponent: () => import('./testimonials/admin-testimonials.component').then(m => m.AdminTestimonialsComponent)
   }
 ];

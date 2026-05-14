@@ -24,12 +24,13 @@
         <li><a routerLink="/products" routerLinkActive="text-primary">Collections</a></li>
         <li><a routerLink="/about" routerLinkActive="text-primary">About</a></li>
 
-        @if (isAuthenticated) {
+        @if (isAuthenticated()) {
           <li class="mt-2 border-t pt-2 border-base-300"></li>
           <li><a routerLink="/cart">Cart</a></li>
           <li><a routerLink="/orders">Orders</a></li>
+          <li><a routerLink="/refunds">Refunds</a></li>
 
-          @if (isAdmin) {
+          @if (isAdmin()) {
             <li><a routerLink="/admin">Admin</a></li>
           }
         }
@@ -56,12 +57,8 @@
       </li>
       <li><a routerLink="/testimonials">Our clients</a></li>
 
-      @if (isAuthenticated) {
-        <li>
-          <a routerLink="/orders" routerLinkActive="text-primary font-medium"> Orders </a>
-        </li>
-
-        @if (isAdmin) {
+      @if (isAuthenticated()) {
+        @if (isAdmin()) {
           <li>
             <a routerLink="/admin" class="text-primary font-semibold"> Admin </a>
           </li>
@@ -73,34 +70,32 @@
   <!-- RIGHT -->
   <div class="navbar-end gap-2">
     <!-- Cart (important UX) -->
-    @if (isAuthenticated) {
-      <a routerLink="/cart" class="btn btn-ghost btn-circle relative">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7h13M7 13l1.5-7m0 0h11"
-          />
-        </svg>
+    <a routerLink="/cart" class="btn btn-ghost btn-circle relative">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7h13M7 13l1.5-7m0 0h11"
+        />
+      </svg>
 
-        <!-- badge example -->
-        @if (cartCount > 0) {
-          <span class="badge badge-primary badge-xs absolute -top-1 -right-1">
-            {{ cartCount }}
-          </span>
-        }
-      </a>
-    }
+      <!-- badge example -->
+      @if (cartCount() > 0) {
+        <span class="badge badge-primary badge-xs absolute -top-1 -right-1">
+          {{ cartCount() }}
+        </span>
+      }
+    </a>
 
     <!-- Auth -->
-    @if (!isAuthenticated) {
+    @if (!isAuthenticated()) {
       <a routerLink="/auth/login" class="btn btn-primary btn-sm px-5"> Login </a>
     } @else {
       <div class="dropdown dropdown-end">
@@ -123,7 +118,9 @@
           <li><a routerLink="/profile">Profile</a></li>
           <li><a routerLink="/orders">Orders</a></li>
           <li><a routerLink="/testimonials">Our clients</a></li>
-
+          <li>
+            <a routerLink="/refunds" routerLinkActive="text-primary font-medium"> Refund </a>
+          </li>
           <li class="mt-1 border-t border-base-300 pt-1">
             <button (click)="logout()" class="text-error">Logout</button>
           </li>

@@ -1,48 +1,116 @@
 <div class="container mx-auto px-4 py-8">
-  <h1 class="text-4xl font-bold mb-8">Manage Users</h1>
+  <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <h1 class="text-4xl font-black">Manage Users</h1>
+  </div>
 
-  <div class="overflow-x-auto">
-    <table class="table table-zebra w-full">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Email</th>
-          <th>Name</th>
-          <th>Role</th>
-          <th>Status</th>
-          <th>Joined</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (user of users(); track user._id) {
-          <tr>
-            <td>{{ user._id }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.name }}</td>
-            <td>
-              <span
-                class="badge"
-                [ngClass]="user.role === 'admin' ? 'badge-warning' : 'badge-info'"
-              >
-                {{ user.role }}
-              </span>
-            </td>
-            <td>
-              <span class="badge badge-success"> Active </span>
-            </td>
-            <td>{{ user.createdAt | date: 'short' }}</td>
-            <td>
-              <div class="flex gap-2">
-                <button class="btn btn-sm btn-outline" (click)="toggleUserStatus(user)">
-                  Deactivate
-                </button>
-                <button class="btn btn-sm btn-error" (click)="deleteUser(user)">Delete</button>
-              </div>
-            </td>
+  <!-- Filters -->
+  <div class="flex flex-col sm:flex-row gap-4 mb-6">
+    <div class="relative flex-1 max-w-sm">
+      <input
+        #searchInput
+        type="text"
+        placeholder="Search by name, email, phone..."
+        class="input input-bordered w-full"
+        (keydown.enter)="onSearch(searchInput.value)"
+      />
+    </div>
+
+    <select class="select select-bordered" (change)="onFilterRole($any($event.target).value)">
+      <option value="all">All Roles</option>
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+
+    <select class="select select-bordered" (change)="onFilterStatus($any($event.target).value)">
+      <option value="all">All Statuses</option>
+      <option value="active">Active</option>
+      <option value="deleted">Deleted</option>
+    </select>
+  </div>
+
+  <div class="bg-base-100 rounded-[2rem] shadow-xl overflow-hidden border border-base-200">
+    <div class="overflow-x-auto">
+      <table class="table w-full">
+        <thead>
+          <tr class="bg-base-200">
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th class="text-right">Actions</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (user of users(); track user._id) {
+            <tr class="hover:bg-base-200/50 transition-colors">
+              <td class="font-bold">{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.phone || '-' }}</td>
+              <td>
+                <select
+                  class="select select-bordered select-sm w-full max-w-[120px]"
+                  (change)="updateRole(user, $event)"
+                  [disabled]="user.isDeleted"
+                >
+                  <option value="user" [selected]="user.role === 'user'">User</option>
+                  <option value="admin" [selected]="user.role === 'admin'">Admin</option>
+                </select>
+              </td>
+              <td>
+                <span
+                  class="badge badge-sm"
+                  [ngClass]="user.isDeleted ? 'badge-error' : 'badge-success'"
+                >
+                  {{ user.isDeleted ? 'Deleted' : 'Active' }}
+                </span>
+              </td>
+              <td>{{ user.createdAt | date: 'shortDate' }}</td>
+              <td>
+                <div class="flex justify-end gap-2">
+                  <button
+                    class="btn btn-sm btn-outline"
+                    [class.btn-error]="!user.isDeleted"
+                    [class.btn-success]="user.isDeleted"
+                    (click)="toggleDelete(user)"
+                  >
+                    {{ user.isDeleted ? 'Restore' : 'Delete' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (users().length === 0) {
+            <tr>
+              <td colspan="7" class="text-center py-8 text-base-content/50">No users found.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-center p-6 border-t border-base-200">
+      <div class="join">
+        <button
+          class="join-item btn btn-sm"
+          [disabled]="currentPage() === 1"
+          (click)="changePage(currentPage() - 1)"
+        >
+          «
+        </button>
+        <button class="join-item btn btn-sm no-animation">
+          Page {{ currentPage() }} of {{ totalPages() }}
+        </button>
+        <button
+          class="join-item btn btn-sm"
+          [disabled]="currentPage() === totalPages()"
+          (click)="changePage(currentPage() + 1)"
+        >
+          »
+        </button>
+      </div>
+    </div>
   </div>
 </div>
