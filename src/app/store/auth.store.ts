@@ -1,23 +1,19 @@
 import { computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-
 import { firstValueFrom } from 'rxjs';
-
-import { URL } from '../shared/ENV';
 import {
   User,
   LoginRequest,
   RegisterRequest,
   ChangePasswordRequest,
 } from '../shared/models/api-response-model';
-import { AuthResponse } from '../shared/models/auth.model';
 import { CartStore } from './cart.store';
+import { AuthService } from '../shared/services/auth.service';
 
 const USER_STORAGE_KEY = 'auth_user';
 const CART_STORAGE_KEY = 'cart';
+
 type AuthState = {
   user: User | null;
   loading: boolean;
@@ -42,7 +38,7 @@ export const AuthStore = signalStore(
   })),
 
   withMethods((store) => {
-    const http = inject(HttpClient);
+    const authService = inject(AuthService);
     const router = inject(Router);
     const cartStore = inject(CartStore);
 
@@ -50,20 +46,11 @@ export const AuthStore = signalStore(
       // ------------------------------------------------------
       // LOGIN
       // ------------------------------------------------------
-      // ... inside withMethods((store) => {
-
       login: async (credentials: LoginRequest) => {
         patchState(store, { loading: true });
 
         try {
-          // 1. Backend returns AuthResponse { user, token }
-          const response = await firstValueFrom(
-            http.post<AuthResponse>(`${URL}/auth/login`, credentials, {
-              withCredentials: true,
-            }),
-          );
-
-          // 2. Extract the user object from the response
+          const response = await firstValueFrom(authService.login(credentials));
           const userData = response.user;
 
           localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
@@ -73,7 +60,7 @@ export const AuthStore = signalStore(
             loading: false,
           });
 
-          // 3. Merge Cart
+          // Merge Cart
           await cartStore.mergeCartWithServer();
 
           await router.navigate(['/']);
@@ -83,17 +70,14 @@ export const AuthStore = signalStore(
         }
       },
 
+      // ------------------------------------------------------
+      // REGISTER
+      // ------------------------------------------------------
       register: async (data: RegisterRequest) => {
         patchState(store, { loading: true });
 
         try {
-          // 1. Backend returns AuthResponse { user, token }
-          const response = await firstValueFrom(
-            http.post<AuthResponse>(`${URL}/auth/register`, data, {
-              withCredentials: true,
-            }),
-          );
-
+          const response = await firstValueFrom(authService.register(data));
           const userData = response.user;
 
           localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
@@ -103,7 +87,7 @@ export const AuthStore = signalStore(
             loading: false,
           });
 
-          // 3. Merge Cart
+          // Merge Cart
           await cartStore.mergeCartWithServer();
 
           await router.navigate(['/']);
@@ -112,6 +96,7 @@ export const AuthStore = signalStore(
           throw error;
         }
       },
+
       // ------------------------------------------------------
       // LOAD CURRENT USER
       // ------------------------------------------------------
@@ -119,14 +104,8 @@ export const AuthStore = signalStore(
         patchState(store, { loading: true });
 
         try {
-          const user = await firstValueFrom(
-            http.get<any>(`${URL}/auth/profile`, {
-              withCredentials: true,
-            }),
-          );
-
-          // The backend returns { user: { ... } }
-          const userData = user.user;
+          const response = await firstValueFrom(authService.getCurrentUser());
+          const userData = response.user;
 
           localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
 
@@ -149,15 +128,7 @@ export const AuthStore = signalStore(
       // ------------------------------------------------------
       logout: async () => {
         try {
-          await firstValueFrom(
-            http.post(
-              `${URL}/auth/logout`,
-              {},
-              {
-                withCredentials: true,
-              },
-            ),
-          );
+          await firstValueFrom(authService.logout());
         } catch {}
 
         localStorage.removeItem(USER_STORAGE_KEY);
@@ -177,11 +148,7 @@ export const AuthStore = signalStore(
         patchState(store, { loading: true });
 
         try {
-          await firstValueFrom(
-            http.post(`${URL}/auth/change-password`, data, {
-              withCredentials: true,
-            }),
-          );
+          await firstValueFrom(authService.changePassword(data));
           patchState(store, { loading: false });
         } catch (error) {
           patchState(store, { loading: false });

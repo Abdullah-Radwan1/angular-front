@@ -7,13 +7,11 @@ import {
   withComputed,
   withHooks,
 } from '@ngrx/signals';
-import { HttpClient } from '@angular/common/http';
 import { computed } from '@angular/core';
 import { firstValueFrom, Subject, debounceTime } from 'rxjs';
-import { URL } from '../shared/ENV';
 import { NotificationService } from '../shared/services/notification.service';
-
 import { Product, CartItem as SharedCartItem } from '../shared/models/api-response-model';
+import { CartService } from '../shared/services/cart.service';
 
 export type CartItem = SharedCartItem & { product: Product };
 
@@ -43,6 +41,7 @@ const getInitialState = (): CartState => {
 };
 
 const initialState: CartState = getInitialState();
+
 const saveCart = (cart: CartItem[]) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -78,7 +77,7 @@ export const CartStore = signalStore(
   })),
 
   withMethods((store) => {
-    const http = inject(HttpClient);
+    const cartService = inject(CartService);
     const notification = inject(NotificationService);
 
     // 🚀 1. Debounce logic variables
@@ -89,9 +88,7 @@ export const CartStore = signalStore(
     const _sendUpdate = async (productId: string, quantity: number) => {
       if (!isAuthenticated()) return;
       try {
-        await firstValueFrom(
-          http.post(`${URL}/cart/add`, { productId, quantity }, { withCredentials: true }),
-        );
+        await firstValueFrom(cartService.addToCart(productId, quantity));
         notification.success('Cart synced');
       } catch (err) {
         notification.error('Failed to sync cart update');
@@ -101,7 +98,7 @@ export const CartStore = signalStore(
     const _sendRemove = async (productId: string) => {
       if (!isAuthenticated()) return;
       try {
-        await firstValueFrom(http.delete(`${URL}/cart/${productId}`, { withCredentials: true }));
+        await firstValueFrom(cartService.removeFromCart(productId));
         notification.success('Item removal synced');
       } catch (err) {
         notification.error('Failed to sync cart removal');
@@ -123,13 +120,13 @@ export const CartStore = signalStore(
       }
     });
 
-    // 🚀 4. Internal Methods (to allow calling each other)
+    // 🚀 4. Internal Methods
     const loadCart = async () => {
       if (!isAuthenticated()) return;
       patchState(store, { loading: true });
       try {
-        const res: any = await firstValueFrom(http.get(`${URL}/cart`, { withCredentials: true }));
-        const items = res?.items ?? [];
+        const res = await firstValueFrom(cartService.getCart());
+        const items = (res?.items as CartItem[]) ?? [];
         patchState(store, { cart: items, loading: false });
         saveCart(items);
       } catch {
@@ -202,10 +199,8 @@ export const CartStore = signalStore(
       syncPrices: async () => {
         if (!isAuthenticated()) return;
         try {
-          const res: any = await firstValueFrom(
-            http.put(`${URL}/cart/sync`, {}, { withCredentials: true }),
-          );
-          const items = res?.items ?? [];
+          const res = await firstValueFrom(cartService.syncPrices());
+          const items = (res?.items as CartItem[]) ?? [];
           patchState(store, { cart: items });
           saveCart(items);
           notification.success('Prices synced');
@@ -222,10 +217,8 @@ export const CartStore = signalStore(
         saveCart([]);
         if (!isAuthenticated()) return;
         try {
-          const res: any = await firstValueFrom(
-            http.delete(`${URL}/cart/clear`, { withCredentials: true }),
-          );
-          const items = res?.items ?? [];
+          const res = await firstValueFrom(cartService.clearCart());
+          const items = (res?.items as CartItem[]) ?? [];
           patchState(store, { cart: items });
           saveCart(items);
           notification.success('Cart cleared');
@@ -240,23 +233,18 @@ export const CartStore = signalStore(
       mergeCartWithServer: async () => {
         const currentCart = store.cart();
         if (currentCart.length === 0) {
-          // If local cart is empty, just load the server cart
           await loadCart();
           return;
         }
 
         try {
-          const res: any = await firstValueFrom(
-            http.post(`${URL}/cart/merge`, { items: currentCart }, { withCredentials: true }),
-          );
-          // After merge, server returns the full merged cart
-          const items = res?.items ?? [];
+          const res = await firstValueFrom(cartService.mergeCart(currentCart));
+          const items = (res?.items as CartItem[]) ?? [];
           patchState(store, { cart: items });
           saveCart(items);
           notification.success('Cart merged with your account');
         } catch (err) {
           console.error('Failed to merge cart', err);
-          // Fallback to just loading server cart if merge fails
           await loadCart();
         }
       },

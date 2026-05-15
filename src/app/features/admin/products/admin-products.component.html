@@ -133,7 +133,9 @@
               </td>
               <td class="font-bold">{{ product.name }}</td>
               <td>
-                <span class="badge badge-ghost badge-sm">{{ product.category?.name || 'Uncategorized' }}</span>
+                <span class="badge badge-ghost badge-sm">{{
+                  product.category.name || 'Uncategorized'
+                }}</span>
               </td>
               <td class="font-mono text-primary font-bold">${{ product.price }}</td>
               <td>

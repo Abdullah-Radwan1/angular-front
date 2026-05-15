@@ -1,9 +1,8 @@
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { firstValueFrom } from 'rxjs';
-import { URL } from '../shared/ENV';
 import { Product } from '../shared/models/api-response-model';
+import { ProductService } from '../shared/services/product.service';
 
 export interface ProductState {
   products: Product[];
@@ -39,17 +38,17 @@ export const productStore = signalStore(
   withState(initialState),
 
   withMethods((store) => {
-    const http = inject(HttpClient);
+    const productService = inject(ProductService);
 
     return {
       // ------------------------------------------------------
       // LOAD ALL PRODUCTS
       // ------------------------------------------------------
-      loadProducts: async () => {
+      loadProducts: async (search?: string) => {
         patchState(store, { loading: true, error: null });
 
         try {
-          const products = await firstValueFrom(http.get<Product[]>(`${URL}/products`));
+          const products = await firstValueFrom(productService.getProducts(search));
 
           patchState(store, { products, loading: false });
         } catch (err: any) {
@@ -67,7 +66,7 @@ export const productStore = signalStore(
         patchState(store, { loading: true, error: null });
 
         try {
-          const product = await firstValueFrom(http.get<Product>(`${URL}/products/${id}`));
+          const product = await firstValueFrom(productService.getProductById(id));
 
           patchState(store, {
             selectedProduct: product,
@@ -88,12 +87,7 @@ export const productStore = signalStore(
         patchState(store, { loading: true, error: null });
 
         try {
-          const params: any = {};
-          if (category && category !== 'ALL') params.category = category;
-
-          const data = await firstValueFrom(
-            http.get<Product[]>(`${URL}/products/category`, { params }),
-          );
+          const data = await firstValueFrom(productService.getCategoryProducts(category));
 
           patchState(store, {
             categoryProducts: data,
@@ -114,11 +108,7 @@ export const productStore = signalStore(
         patchState(store, { relatedLoading: true });
 
         try {
-          const data = await firstValueFrom(
-            http.get<Product[]>(`${URL}/products/related`, {
-              params: { category },
-            }),
-          );
+          const data = await firstValueFrom(productService.getRelatedProducts(category));
 
           patchState(store, {
             relatedProducts: data,
@@ -136,7 +126,7 @@ export const productStore = signalStore(
         patchState(store, { loading: true });
 
         try {
-          const data = await firstValueFrom(http.get<Product[]>(`${URL}/products/featured`));
+          const data = await firstValueFrom(productService.getFeaturedProducts());
 
           patchState(store, {
             featuredProducts: data,
@@ -149,11 +139,15 @@ export const productStore = signalStore(
           });
         }
       },
+
+      // ------------------------------------------------------
+      // FAST SELLING
+      // ------------------------------------------------------
       loadFastSellingProducts: async () => {
         patchState(store, { loading: true });
 
         try {
-          const data = await firstValueFrom(http.get<Product[]>(`${URL}/products/fast-selling`));
+          const data = await firstValueFrom(productService.getFastSellingProducts());
 
           patchState(store, {
             fastSellingProducts: data,
@@ -174,11 +168,7 @@ export const productStore = signalStore(
         patchState(store, { loading: true, error: null });
 
         try {
-          const data = await firstValueFrom(
-            http.get<Product[]>(`${URL}/products`, {
-              params: { search: term },
-            }),
-          );
+          const data = await firstValueFrom(productService.getProducts(term));
 
           patchState(store, {
             products: data,
@@ -195,24 +185,11 @@ export const productStore = signalStore(
       // ------------------------------------------------------
       // FILTER
       // ------------------------------------------------------
-      loadFilteredProducts: async ({ minPrice, maxPrice, categories, sort, search }: any) => {
+      loadFilteredProducts: async (filters: any) => {
         patchState(store, { loading: true, error: null });
 
         try {
-          const params: any = {
-            minPrice,
-            maxPrice,
-            sort,
-            search,
-          };
-
-          if (categories) {
-            params.categories = categories.join(',');
-          }
-
-          const data = await firstValueFrom(
-            http.get<Product[]>(`${URL}/products/filter`, { params }),
-          );
+          const data = await firstValueFrom(productService.getFilteredProducts(filters));
 
           patchState(store, {
             products: data,
