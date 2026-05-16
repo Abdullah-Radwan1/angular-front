@@ -1,10 +1,131 @@
-<nav
-  class="navbar bg-base-100/80 backdrop-blur border-b border-base-300"
-  [class.scrolled]="scrolled"
->
-  <div class="navbar-start">
-    <div class="dropdown" [class.dropdown-open]="mobileOpen">
-      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden" (click)="toggleMobile()">
+@if (isAdmin()) {
+  <header
+    class="navbar bg-base-100/80 backdrop-blur border-b border-base-300 sticky top-0 z-50 px-4 lg:px-8"
+  >
+    <!-- LEFT -->
+    <div class="navbar-start">
+      <!-- Mobile menu -->
+      <div class="dropdown">
+        <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h8m-8 6h16"
+            />
+          </svg>
+        </div>
+
+        <ul
+          tabindex="0"
+          class="menu menu-sm dropdown-content mt-3 z-1 p-3 shadow-lg bg-base-100 rounded-box w-56 border border-base-300"
+        >
+          <li><a routerLink="/" routerLinkActive="text-primary">Home</a></li>
+          <li class="mt-2 border-t pt-2 border-base-300"></li>
+          <li><a routerLink="/admin">Admin Dashboard</a></li>
+        </ul>
+      </div>
+
+      <!-- Logo -->
+      <a routerLink="/" class="text-xl font-bold tracking-tight">
+        LUXURY <span class="text-primary italic">HOME</span>
+        <span class="text-xs text-error font-medium ml-1">(Admin)</span>
+      </a>
+    </div>
+
+    <!-- CENTER (Desktop Nav) -->
+    <div class="navbar-center hidden lg:flex">
+      <ul class="menu menu-horizontal gap-2 px-1 text-sm">
+        <li><a routerLink="/" routerLinkActive="text-primary font-medium">Home</a></li>
+        <li><a routerLink="/testimonials">Our clients</a></li>
+        <li><a routerLink="/admin" class="text-primary font-semibold">Admin Dashboard</a></li>
+      </ul>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="navbar-end gap-2">
+      <div class="dropdown dropdown-end">
+        <div
+          tabindex="0"
+          role="button"
+          class="btn btn-ghost btn-circle avatar ring ring-primary/20 hover:ring-primary transition"
+        >
+          <div
+            class="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center text-sm font-semibold"
+          >
+            {{ userInitials() }}
+          </div>
+        </div>
+
+        <ul
+          tabindex="0"
+          class="menu menu-sm dropdown-content mt-3 z-1 p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-300"
+        >
+          <li><a routerLink="/profile">Profile</a></li>
+          <li class="mt-1 border-t border-base-300 pt-1">
+            <button (click)="logout()" class="text-error">Logout</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+} @else {
+  <header
+    class="navbar bg-base-100/80 backdrop-blur border-b border-base-300 sticky top-0 z-50 px-4 lg:px-8"
+  >
+    <!-- LEFT -->
+    <div class="navbar-start">
+      <!-- Mobile menu -->
+      <div class="dropdown">
+        <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h8m-8 6h16"
+            />
+          </svg>
+        </div>
+
+        <ul
+          tabindex="0"
+          class="menu menu-sm dropdown-content mt-3 z-1 p-3 shadow-lg bg-base-100 rounded-box w-56 border border-base-300"
+        >
+          <li><a routerLink="/" routerLinkActive="text-primary">Home</a></li>
+          <li><a routerLink="/products" routerLinkActive="text-primary">Collections</a></li>
+
+          @if (isAuthenticated()) {
+            <li class="mt-2 border-t pt-2 border-base-300"></li>
+            <li><a routerLink="/cart">Cart</a></li>
+            <li><a routerLink="/orders">Orders</a></li>
+            <li><a routerLink="/refunds">Refunds</a></li>
+          }
+        </ul>
+      </div>
+
+      <!-- Logo -->
+      <a routerLink="/" class="text-xl font-bold tracking-tight">
+        LUXURY <span class="text-primary italic">HOME</span>
+      </a>
+    </div>
+
+    <!-- CENTER (Desktop Nav) -->
+    <div class="navbar-center hidden lg:flex">
+      <ul class="menu menu-horizontal gap-2 px-1 text-sm">
+        <li><a routerLink="/" routerLinkActive="text-primary font-medium">Home</a></li>
+        <li>
+          <a routerLink="/products" routerLinkActive="text-primary font-medium">Collections</a>
+        </li>
+        <li><a routerLink="/testimonials">Our clients</a></li>
+      </ul>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="navbar-end gap-2">
+      <!-- Cart -->
+      <a routerLink="/cart" class="btn btn-ghost btn-circle relative">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-5 w-5"
@@ -16,37 +137,48 @@
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="2"
-            d="M4 6h16M4 12h8m-8 6h16"
+            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.5 7h13M7 13l1.5-7m0 0h11"
           />
         </svg>
-      </div>
-      <ul
-        tabindex="0"
-        class="menu menu-sm dropdown-content mt-3 z-1 p-2 shadow bg-base-100 rounded-box w-52"
-      >
-        @for (link of navLinks; track link.path) {
-          <li>
-            <a [routerLink]="link.path" (click)="closeMobile()">
-              {{ link.label }}
-            </a>
-          </li>
+
+        @if (cartCount() > 0) {
+          <span class="badge badge-primary badge-xs absolute -top-1 -right-1">
+            {{ cartCount() }}
+          </span>
         }
-      </ul>
-    </div>
-    <a routerLink="/" class="btn btn-ghost text-xl">&lt;Abdullah /&gt;</a>
-  </div>
-  <div class="navbar-center hidden lg:flex">
-    <ul class="menu menu-horizontal px-1">
-      @for (link of navLinks; track link.path) {
-        <li>
-          <a [routerLink]="link.path">
-            {{ link.label }}
-          </a>
-        </li>
+      </a>
+
+      <!-- Auth -->
+      @if (!isAuthenticated()) {
+        <a routerLink="/auth/login" class="btn btn-primary btn-sm px-5">Login</a>
+      } @else {
+        <div class="dropdown dropdown-end">
+          <div
+            tabindex="0"
+            role="button"
+            class="btn btn-ghost btn-circle avatar ring ring-primary/20 hover:ring-primary transition"
+          >
+            <div
+              class="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center text-sm font-semibold"
+            >
+              {{ userInitials() }}
+            </div>
+          </div>
+
+          <ul
+            tabindex="0"
+            class="menu menu-sm dropdown-content mt-3 z-1 p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-300"
+          >
+            <li><a routerLink="/profile">Profile</a></li>
+            <li><a routerLink="/orders">Orders</a></li>
+            <li><a routerLink="/testimonials">Our clients</a></li>
+            <li><a routerLink="/refunds" routerLinkActive="text-primary font-medium">Refund</a></li>
+            <li class="mt-1 border-t border-base-300 pt-1">
+              <button (click)="logout()" class="text-error">Logout</button>
+            </li>
+          </ul>
+        </div>
       }
-    </ul>
-  </div>
-  <div class="navbar-end">
-    <!-- Add any end content if needed -->
-  </div>
-</nav>
+    </div>
+  </header>
+}

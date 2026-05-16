@@ -46,10 +46,10 @@ export class ProfileComponent implements OnInit {
       },
     );
   }
-
   ngOnInit(): void {
     // Refresh user data on profile page visit
     this.authStore.loadCurrentUser();
+    console.log(this.authStore.isAdmin());
   }
 
   private passwordMatchValidator(g: FormGroup) {

@@ -14,7 +14,9 @@ import { Product, PaginatedResponse } from '../../shared/models/api-response-mod
 })
 export class ProductsComponent implements OnInit {
   products = signal<Product[]>([]);
-  categories = signal<{ _id: string; name: string }[]>([]);
+  categories = signal<{ _id: string; name: string; parentId?: string }[]>([]);
+  mainCategories = signal<{ _id: string; name: string; parentId?: string }[]>([]);
+  subCategories = signal<{ _id: string; name: string; parentId?: string }[]>([]);
 
   // UI State
   isLoading = signal(false);
@@ -41,6 +43,7 @@ export class ProductsComponent implements OnInit {
   ) {
     this.filterForm = this.fb.group({
       category: [''],
+      subcategory: [''],
       minPrice: [''],
       maxPrice: [''],
       search: [''],
@@ -49,6 +52,10 @@ export class ProductsComponent implements OnInit {
     this.filterForm.valueChanges.pipe(debounceTime(500)).subscribe(() => {
       this.currentPage.set(1);
       this.loadProducts();
+    });
+
+    this.filterForm.get('category')?.valueChanges.subscribe(() => {
+      this.onCategoryChange();
     });
   }
 
@@ -68,6 +75,7 @@ export class ProductsComponent implements OnInit {
     };
 
     if (formValue.category) params.category = formValue.category;
+    if (formValue.subcategory) params.subcategory = formValue.subcategory;
     if (formValue.search) params.search = formValue.search;
     if (formValue.minPrice) params.minPrice = formValue.minPrice;
     if (formValue.maxPrice) params.maxPrice = formValue.maxPrice;
@@ -94,10 +102,21 @@ export class ProductsComponent implements OnInit {
   loadCategories(): void {
     this.apiService.get<any>('/categories').subscribe({
       next: (res) => {
-        this.categories.set(res.categories || res.data || []);
+        const allCats = res.categories || res.data || [];
+        this.categories.set(allCats);
+        this.mainCategories.set(allCats.filter((c: any) => !c.parentId));
       },
       error: (err) => console.error(err),
     });
+  }
+
+  onCategoryChange(): void {
+    const categoryId = this.filterForm.get('category')?.value;
+    const subCats = this.categories().filter((c: any) => c.parentId === categoryId);
+    this.subCategories.set(subCats);
+    if (!subCats.some((c) => c._id === this.filterForm.get('subcategory')?.value)) {
+        this.filterForm.get('subcategory')?.setValue('');
+    }
   }
 
   changePage(page: number): void {

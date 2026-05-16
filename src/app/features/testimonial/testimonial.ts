@@ -11,15 +11,7 @@ import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-testimonial',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    LucideFileText,
-    LucideSend,
-    LucideStar,
-    TestimonialsComponent,
-    RouterLink,
-  ],
+  imports: [CommonModule, ReactiveFormsModule, LucideFileText, LucideSend, LucideStar, RouterLink],
   templateUrl: './testimonial.html',
 })
 export class TestimonialComponent {

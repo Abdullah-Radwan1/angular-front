@@ -1,16 +1,17 @@
 import { Component, signal } from '@angular/core';
 import { NavbarComponent } from './layout/navbar/navbar.component';
-import { Footer } from './layout/footer/footer';
+
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent, NotificationComponent, LoadingComponent } from './shared/components';
+import { NotificationComponent } from './shared/components/notification.component';
+import { LoadingComponent } from './shared/components/loading.component';
+import { FooterComponent } from './layout/footer/footer.component';
 
 @Component({
   selector: 'app-root',
   imports: [
-    NavbarComponent,
-    Footer,
+    FooterComponent,
     RouterOutlet,
-    HeaderComponent,
+    NavbarComponent,
     NotificationComponent,
     LoadingComponent,
   ],

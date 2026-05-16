@@ -18,7 +18,7 @@ export interface Product {
   _id: string;
   slug: string;
   name: string;
-
+  subcategory?: Category | string | any;
   description: string;
 
   imageUrl: string;

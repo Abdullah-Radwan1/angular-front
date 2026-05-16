@@ -15,6 +15,8 @@ export class AdminProductsComponent implements OnInit {
   // Data State
   products = signal<Product[]>([]);
   categories = signal<any[]>([]);
+  mainCategories = signal<any[]>([]);
+  subCategories = signal<any[]>([]);
 
   // UI State
   showForm = signal(false);
@@ -25,6 +27,9 @@ export class AdminProductsComponent implements OnInit {
   // Search, Filter, & Sort State
   searchQuery = signal('');
   statusFilter = signal('all'); // options: 'all', 'active', 'archived'
+  categoryFilter = signal('');
+  subcategoryFilter = signal('');
+  filterSubCategories = signal<any[]>([]);
   sortOption = signal('-createdAt');
 
   // Pagination State
@@ -50,6 +55,7 @@ export class AdminProductsComponent implements OnInit {
       description: ['', Validators.required],
       price: [0, [Validators.required, Validators.min(0)]],
       category: ['', Validators.required],
+      subcategory: [''],
       colors: ['', Validators.required], // Handled as string in UI, array in DB
       stock: [0, [Validators.required, Validators.min(0)]],
       isActive: [true],
@@ -66,6 +72,12 @@ export class AdminProductsComponent implements OnInit {
 
     if (this.statusFilter() !== 'all') {
       params.status = this.statusFilter();
+    }
+    if (this.categoryFilter()) {
+      params.category = this.categoryFilter();
+    }
+    if (this.subcategoryFilter()) {
+      params.subcategory = this.subcategoryFilter();
     }
 
     this.apiService.get<PaginatedResponse<Product>>('/admin/products', { params }).subscribe({
@@ -86,9 +98,42 @@ export class AdminProductsComponent implements OnInit {
 
   loadCategories(): void {
     this.apiService.get<any>('/categories').subscribe({
-      next: (res) => this.categories.set(res.categories || res.data || []),
+      next: (res) => {
+        const allCats = res.categories || res.data || [];
+        this.categories.set(allCats);
+        this.mainCategories.set(allCats.filter((c: any) => !c.parentId));
+      },
       error: () => this.notificationService.error('Failed to load categories'),
     });
+  }
+
+  onCategoryChange(event: Event): void {
+    const categoryId = (event.target as HTMLSelectElement).value;
+    this.updateSubcategories(categoryId);
+  }
+
+  updateSubcategories(categoryId: string): void {
+    const subCats = this.categories().filter((c: any) => c.parentId === categoryId);
+    this.subCategories.set(subCats);
+    if (!subCats.some((c) => c._id === this.productForm.get('subcategory')?.value)) {
+        this.productForm.get('subcategory')?.setValue('');
+    }
+  }
+
+  onFilterCategory(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.categoryFilter.set(value);
+    this.subcategoryFilter.set('');
+    this.filterSubCategories.set(this.categories().filter((c: any) => c.parentId === value));
+    this.currentPage.set(1);
+    this.loadProducts();
+  }
+
+  onFilterSubcategory(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.subcategoryFilter.set(value);
+    this.currentPage.set(1);
+    this.loadProducts();
   }
 
   // --- Event Handlers for Filters ---
@@ -116,17 +161,23 @@ export class AdminProductsComponent implements OnInit {
     this.showForm.set(true);
     if (product) {
       this.editingProduct.set(product);
+      
+      const categoryId = (product.category as any)?._id || product.category;
+      this.updateSubcategories(categoryId);
+
       // Join colors for display and get total stock
       const displayData = {
         ...product,
-        category: (product.category as any)?._id || product.category,
+        category: categoryId,
+        subcategory: (product.subcategory as any)?._id || product.subcategory || '',
         colors: product.variants?.map((v) => v.color).join(', ') || '',
         stock: this.getTotalStock(product),
       };
       this.productForm.patchValue(displayData);
     } else {
       this.editingProduct.set(null);
-      this.productForm.reset({ price: 0, stock: 0, isActive: true });
+      this.productForm.reset({ price: 0, stock: 0, isActive: true, subcategory: '' });
+      this.subCategories.set([]);
       this.selectedFile = null;
     }
   }
@@ -177,6 +228,8 @@ export class AdminProductsComponent implements OnInit {
       if (key === 'colors' || key === 'stock') return; // Handled by variants
 
       let value = rawData[key];
+      if (key === 'subcategory' && !value) return; // don't append empty subcategory
+
       if (Array.isArray(value)) {
         formData.append(key, JSON.stringify(value));
       } else {

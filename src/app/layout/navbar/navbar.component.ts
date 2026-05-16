@@ -1,23 +1,32 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterModule } from '@angular/router';
+import { AuthStore } from '../../store/auth.store';
+import { CartStore } from '../../store/cart.store';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterModule, RouterLink],
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent {
   scrolled = false;
   mobileOpen = false;
 
-  navLinks = [
-    { label: 'Skills', path: '/skills' },
-    { label: 'Projects', path: '/projects' },
-    { label: 'Experience', path: '/experience' },
-    { label: 'Dashboard', path: '/dashboard' },
-  ];
+  readonly authStore = inject(AuthStore);
+  readonly cartStore = inject(CartStore);
+
+  isAuthenticated = this.authStore.isAuthenticated;
+  isAdmin = this.authStore.isAdmin;
+  currentUser = this.authStore.user;
+  cartCount = this.cartStore.totalItems;
+
+  userInitials = computed(() => {
+    const user = this.currentUser();
+    if (!user || !user.name) return '';
+    return user.name.charAt(0).toUpperCase();
+  });
 
   @HostListener('window:scroll')
   onScroll() {
@@ -31,4 +40,9 @@ export class NavbarComponent {
   closeMobile() {
     this.mobileOpen = false;
   }
+
+  logout(): void {
+    this.authStore.logout();
+  }
 }
+

@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
 import { AuthenticatedGuard } from './core/guards/authenticated.guard';
+import { CustomerGuard } from './core/guards/customer.guard';
 
 export const routes: Routes = [
   {
@@ -15,13 +16,13 @@ export const routes: Routes = [
   },
   {
     path: 'testimonials',
-
     loadComponent: () =>
       import('./features/testimonial/testimonial').then((m) => m.TestimonialComponent),
   },
   {
     path: 'products',
     loadChildren: () => import('./features/products/products.routes').then((m) => m.productsRoutes),
+    canActivate: [CustomerGuard],
   },
   {
     path: 'product/:slug',
@@ -30,25 +31,27 @@ export const routes: Routes = [
         (m) => m.ProductDetailsComponent,
       );
     },
+    canActivate: [CustomerGuard],
   },
   {
     path: 'cart',
     loadChildren: () => import('./features/cart/cart.routes').then((m) => m.cartRoutes),
+    canActivate: [CustomerGuard],
   },
   {
     path: 'checkout',
     loadChildren: () => import('./features/checkout/checkout.routes').then((m) => m.checkoutRoutes),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, CustomerGuard],
   },
   {
     path: 'orders',
     loadChildren: () => import('./features/orders/orders.routes').then((m) => m.ordersRoutes),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, CustomerGuard],
   },
   {
     path: 'refunds',
     loadChildren: () => import('./features/refunds/refunds.routes').then((m) => m.REFUND_ROUTES),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, CustomerGuard],
   },
 
   {
@@ -56,13 +59,9 @@ export const routes: Routes = [
     loadComponent: () => {
       return import('./features/profile/profile').then((m) => m.ProfileComponent);
     },
-
     canActivate: [AuthGuard],
   },
-  {
-    path: 'about',
-    loadChildren: () => import('./features/about/about.routes').then((m) => m.aboutRoutes),
-  },
+
   {
     path: 'admin',
     loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),

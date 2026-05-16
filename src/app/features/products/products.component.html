@@ -95,7 +95,7 @@
                   >All Collections</span
                 >
               </label>
-              @for (category of categories(); track category._id) {
+              @for (category of mainCategories(); track category._id) {
                 <label class="flex items-center gap-3 cursor-pointer group">
                   <input
                     type="radio"
@@ -110,6 +110,41 @@
               }
             </div>
           </div>
+
+          <!-- Subcategories -->
+          @if (filterForm.get('category')?.value && subCategories().length > 0) {
+            <div class="animate-fade-in">
+              <h3 class="text-xs font-black uppercase tracking-widest opacity-30 mb-6">
+                Subcategories
+              </h3>
+              <div class="flex flex-col gap-2">
+                <label class="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="radio"
+                    formControlName="subcategory"
+                    value=""
+                    class="radio radio-secondary radio-sm border-2"
+                  />
+                  <span class="font-bold text-sm group-hover:text-secondary transition-colors"
+                    >All Subcategories</span
+                  >
+                </label>
+                @for (sub of subCategories(); track sub._id) {
+                  <label class="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="radio"
+                      formControlName="subcategory"
+                      [value]="sub._id"
+                      class="radio radio-secondary radio-sm border-2"
+                    />
+                    <span class="font-bold text-sm group-hover:text-secondary transition-colors">{{
+                      sub.name
+                    }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
 
           <!-- Price Range -->
           <div>
@@ -141,7 +176,7 @@
           <!-- Clear Filters -->
           <button
             type="button"
-            (click)="filterForm.reset({ category: '', search: '', minPrice: '', maxPrice: '' })"
+            (click)="filterForm.reset({ category: '', subcategory: '', search: '', minPrice: '', maxPrice: '' })"
             class="btn btn-ghost btn-block btn-sm rounded-xl text-error font-black uppercase tracking-tighter opacity-50 hover:opacity-100"
           >
             Reset Filters

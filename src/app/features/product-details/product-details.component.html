@@ -18,9 +18,16 @@
       <div class="flex flex-col">
         <div class="mb-6">
           <div class="flex items-center gap-2 mb-2">
-            <span class="badge badge-outline badge-sm opacity-50">{{
-              product.category.name || 'Collection'
-            }}</span>
+            <div class="flex gap-1">
+              <span class="badge badge-outline badge-sm opacity-50">{{
+                product.category.name || 'Collection'
+              }}</span>
+              @if (product.subcategory) {
+                <span class="badge badge-outline badge-sm opacity-50">{{
+                  product.subcategory.name || 'Collection'
+                }}</span>
+              }
+            </div>
             @if (getTotalStock(product) === 0) {
               <span class="badge badge-error badge-sm">Out of Stock</span>
             } @else if (getTotalStock(product) <= 3) {

@@ -89,6 +89,32 @@
 
     <div class="form-control w-full lg:max-w-xs">
       <label class="label">
+        <span class="label-text-alt font-bold uppercase opacity-60">Category</span>
+      </label>
+      <select class="select select-bordered w-full" (change)="onFilterCategory($event)">
+        <option value="">All Categories</option>
+        @for (cat of mainCategories(); track cat._id) {
+          <option [value]="cat._id" [selected]="categoryFilter() === cat._id">{{ cat.name }}</option>
+        }
+      </select>
+    </div>
+
+    @if (categoryFilter() && filterSubCategories().length > 0) {
+      <div class="form-control w-full lg:max-w-xs">
+        <label class="label">
+          <span class="label-text-alt font-bold uppercase opacity-60">Subcategory</span>
+        </label>
+        <select class="select select-bordered w-full" (change)="onFilterSubcategory($event)">
+          <option value="">All Subcategories</option>
+          @for (cat of filterSubCategories(); track cat._id) {
+            <option [value]="cat._id" [selected]="subcategoryFilter() === cat._id">{{ cat.name }}</option>
+          }
+        </select>
+      </div>
+    }
+
+    <div class="form-control w-full lg:max-w-xs">
+      <label class="label">
         <span class="label-text-alt font-bold uppercase opacity-60">Sort By</span>
       </label>
       <select
@@ -133,9 +159,16 @@
               </td>
               <td class="font-bold">{{ product.name }}</td>
               <td>
-                <span class="badge badge-ghost badge-sm">{{
-                  product.category.name || 'Uncategorized'
-                }}</span>
+                <div class="flex flex-col gap-1">
+                  <span class="badge badge-ghost badge-sm">{{
+                    product.category.name || 'Uncategorized'
+                  }}</span>
+                  @if (product.subcategory) {
+                    <span class="badge badge-outline badge-xs opacity-70">{{
+                      product.subcategory.name || 'Uncategorized'
+                    }}</span>
+                  }
+                </div>
               </td>
               <td class="font-mono text-primary font-bold">${{ product.price }}</td>
               <td>
@@ -256,10 +289,36 @@
               <span class="label-text font-bold text-xs uppercase opacity-70">Category</span>
             </label>
 
-            <select formControlName="category" class="select select-bordered w-full">
+            <select
+              formControlName="category"
+              class="select select-bordered w-full"
+              (change)="onCategoryChange($event)"
+            >
               <option value="" disabled>Select category</option>
 
-              @for (cat of categories(); track cat._id) {
+              @for (cat of mainCategories(); track cat._id) {
+                <option [value]="cat._id">
+                  {{ cat.name }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="form-control">
+            <label class="label pb-1">
+              <span class="label-text font-bold text-xs uppercase opacity-70"
+                >Subcategory (Optional)</span
+              >
+            </label>
+
+            <select
+              formControlName="subcategory"
+              class="select select-bordered w-full"
+              [disabled]="subCategories().length === 0"
+            >
+              <option value="">None</option>
+
+              @for (cat of subCategories(); track cat._id) {
                 <option [value]="cat._id">
                   {{ cat.name }}
                 </option>

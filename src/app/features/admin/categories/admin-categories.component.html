@@ -21,6 +21,36 @@
               />
             </div>
 
+            <div class="form-control">
+              <label class="label text-xs font-bold uppercase opacity-50"> Category Type </label>
+              <div class="flex gap-4 px-1">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" [value]="false" [checked]="!isSubSelected()" (change)="setSubSelected(false)" class="radio radio-primary radio-sm" />
+                  <span class="text-sm font-bold">Main Category</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" [value]="true" [checked]="isSubSelected()" (change)="setSubSelected(true)" class="radio radio-primary radio-sm" />
+                  <span class="text-sm font-bold">Subcategory</span>
+                </label>
+              </div>
+            </div>
+
+            @if (isSubSelected()) {
+              <div class="form-control animate-fade-in">
+                <label class="label text-xs font-bold uppercase opacity-50"> Parent Collection </label>
+                <select 
+                  formControlName="parentId" 
+                  class="select select-bordered w-full rounded-2xl font-semibold focus:select-primary"
+                >
+                  @for (cat of mainCategories(); track cat._id) {
+                    @if (cat._id !== editingId()) {
+                      <option [value]="cat._id">{{ cat.name }}</option>
+                    }
+                  }
+                </select>
+              </div>
+            }
+
             <div class="flex flex-col gap-2 pt-3">
               <button
                 type="submit"
@@ -59,54 +89,48 @@
           </div>
 
         } @else {
-          @for (category of categories(); track category._id) {
-            <div
-              class="card bg-base-100 border border-base-200 rounded-2xl hover:border-primary/40 transition-all group"
-            >
-              <div class="card-body flex flex-row items-center gap-5 p-5">
-                <!-- ICON -->
-                <div
-                  class="w-14 h-14 rounded-xl overflow-hidden bg-base-200 flex items-center justify-center shrink-0"
-                >
-                  <span class="text-xl font-black opacity-30">
-                    {{ category.name.charAt(0) }}
-                  </span>
+          @for (category of mainCategories(); track category._id) {
+            <!-- MAIN CATEGORY -->
+            <div class="card bg-base-100 border border-base-200 rounded-2xl hover:border-primary/40 transition-all group overflow-hidden">
+              <div class="card-body flex flex-row items-center gap-5 p-5 bg-base-200/20">
+                <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <span class="text-lg font-black text-primary">{{ category.name.charAt(0) }}</span>
                 </div>
 
-                <!-- INFO -->
                 <div class="flex-1 min-w-0">
-                  <h3 class="font-bold text-lg truncate">
-                    {{ category.name }}
-                  </h3>
-                  <p class="text-xs font-mono opacity-30">{{ category.slug }}</p>
+                  <h3 class="font-bold text-lg truncate">{{ category.name }}</h3>
+                  <p class="text-[10px] font-mono opacity-30 uppercase tracking-widest">Main Collection</p>
                 </div>
 
-                <!-- ACTIONS -->
-                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                  <button
-                    (click)="editCategory(category)"
-                    class="btn btn-ghost btn-sm btn-square rounded-xl"
-                  >
-                    ✏️
-                  </button>
-
-                  <button
-                    (click)="deleteCategory(category._id)"
-                    class="btn btn-ghost btn-sm btn-square rounded-xl text-error"
-                  >
-                    🗑️
-                  </button>
+                <div class="flex gap-2">
+                  <button (click)="editCategory(category)" class="btn btn-ghost btn-sm btn-square rounded-xl hover:bg-base-300">✏️</button>
+                  <button (click)="deleteCategory(category._id)" class="btn btn-ghost btn-sm btn-square rounded-xl text-error hover:bg-error/10">🗑️</button>
                 </div>
               </div>
+
+              <!-- SUBCATEGORIES -->
+              @if (getSubcategories(category._id).length > 0) {
+                <div class="border-t border-base-200">
+                  @for (sub of getSubcategories(category._id); track sub._id) {
+                    <div class="flex items-center gap-4 py-3 px-6 pl-14 hover:bg-base-200/40 transition group/sub">
+                      <div class="w-1 h-1 rounded-full bg-base-300"></div>
+                      <div class="flex-1">
+                        <span class="font-semibold text-sm">{{ sub.name }}</span>
+                        <span class="ml-2 text-[10px] font-mono opacity-20 uppercase tracking-tight">{{ sub.slug }}</span>
+                      </div>
+                      <div class="flex gap-1 opacity-0 group-hover/sub:opacity-100 transition">
+                        <button (click)="editCategory(sub)" class="btn btn-ghost btn-xs btn-square">✏️</button>
+                        <button (click)="deleteCategory(sub._id)" class="btn btn-ghost btn-xs btn-square text-error">🗑️</button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             </div>
 
           } @empty {
-            <div
-              class="py-24 text-center border border-dashed border-base-300 rounded-3xl bg-base-200/20"
-            >
-              <p class="font-semibold opacity-40">
-                No categories found. Create your first collection.
-              </p>
+            <div class="py-24 text-center border border-dashed border-base-300 rounded-3xl bg-base-200/20">
+              <p class="font-semibold opacity-40">No categories found. Create your first collection.</p>
             </div>
           }
         }

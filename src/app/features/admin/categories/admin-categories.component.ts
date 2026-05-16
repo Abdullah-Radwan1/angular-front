@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../shared/services/api.service';
@@ -16,6 +16,10 @@ export class AdminCategoriesComponent implements OnInit {
   categoryForm: FormGroup;
   editingId = signal<string | null>(null);
 
+  mainCategories = computed(() => 
+    this.categories().filter(c => !c.parentId)
+  );
+
   constructor(
     private fb: FormBuilder,
     private apiService: ApiService,
@@ -23,6 +27,7 @@ export class AdminCategoriesComponent implements OnInit {
   ) {
     this.categoryForm = this.fb.group({
       name: ['', [Validators.required]],
+      parentId: [null],
     });
   }
 
@@ -44,6 +49,10 @@ export class AdminCategoriesComponent implements OnInit {
     });
   }
 
+  getSubcategories(parentId: string): any[] {
+    return this.categories().filter(c => c.parentId === parentId);
+  }
+
   onSubmit(): void {
     if (this.categoryForm.invalid) return;
 
@@ -57,7 +66,7 @@ export class AdminCategoriesComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.notificationService.success(`Category ${id ? 'updated' : 'created'} successfully`);
-        this.categoryForm.reset();
+        this.categoryForm.reset({ name: '', parentId: null });
         this.editingId.set(null);
         this.loadCategories();
       },
@@ -67,13 +76,17 @@ export class AdminCategoriesComponent implements OnInit {
 
   editCategory(category: any): void {
     this.editingId.set(category._id);
+    this.subSelected = !!category.parentId;
     this.categoryForm.patchValue({
       name: category.name,
+      parentId: category.parentId || null,
     });
+    // Scroll to top or form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   deleteCategory(id: string): void {
-    if (!confirm('Are you sure you want to delete this category?')) return;
+    if (!confirm('Are you sure you want to delete this category? This will also delete its subcategories.')) return;
 
     this.apiService.delete(`/categories/${id}`).subscribe({
       next: () => {
@@ -84,8 +97,24 @@ export class AdminCategoriesComponent implements OnInit {
     });
   }
 
+  private subSelected = false;
+
+  isSubSelected(): boolean {
+    return this.subSelected;
+  }
+
+  setSubSelected(val: boolean): void {
+    this.subSelected = val;
+    if (val && !this.categoryForm.get('parentId')?.value && this.mainCategories().length > 0) {
+      this.categoryForm.get('parentId')?.setValue(this.mainCategories()[0]._id);
+    } else if (!val) {
+      this.categoryForm.get('parentId')?.setValue(null);
+    }
+  }
+
   cancelEdit(): void {
     this.editingId.set(null);
-    this.categoryForm.reset();
+    this.categoryForm.reset({ name: '', parentId: null });
+    this.subSelected = false;
   }
 }
