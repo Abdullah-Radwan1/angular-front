@@ -1,55 +1,85 @@
-<div class="container mx-auto px-4 py-12 max-w-4xl">
-  <div class="flex flex-col md:flex-row gap-12">
-    <!-- Sidebar -->
-    <div class="w-full md:w-64 shrink-0">
-      <div class="card bg-base-200 p-8 rounded-4xl text-center">
-        <div class="avatar placeholder mb-4">
-          <div class="bg-primary text-primary-content rounded-full w-24">
-            <span class="text-4xl font-black uppercase">{{ authStore.user()?.name?.[0] }}</span>
+<div class="container mx-auto px-4 py-12 max-w-5xl transition-all duration-300">
+  <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Sidebar Profile Summary -->
+    <aside class="w-full lg:w-72 shrink-0">
+      <div
+        class="card bg-base-200 border border-base-300 p-6 rounded-3xl text-center sticky top-6 shadow-sm"
+      >
+        <div class="avatar placeholder mb-4 justify-center">
+          <div
+            class="bg-primary text-primary-content rounded-full w-24 h-24 ring-4 ring-base-100 shadow-md"
+          >
+            <span class="text-3xl font-bold uppercase select-none">
+              {{ authStore.user()?.name?.[0] }}
+            </span>
           </div>
         </div>
-        <h2 class="text-2xl font-black">{{ authStore.user()?.name }}</h2>
-        <p class="text-xs font-black uppercase opacity-40 tracking-widest mt-1">
+
+        <h2 class="text-xl font-bold tracking-tight text-base-content">
+          {{ authStore.user()?.name }}
+        </h2>
+        <p class="text-xs font-semibold uppercase tracking-widest text-base-content/60 mt-1.5">
           {{ authStore.user()?.role }}
         </p>
-        <div class="divider"></div>
-      </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 space-y-8">
-      <div>
-        <h1 class="text-5xl font-black mb-2">Profile</h1>
-        <p class="text-base-content/50 font-medium">Manage your account details and preferences.</p>
+        <div class="divider opacity-60 my-4"></div>
       </div>
+    </aside>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="card bg-base-100 border border-base-200 p-8 rounded-4xl shadow-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block"
+    <!-- Main Dynamic Content Panel -->
+    <main class="flex-1 space-y-8">
+      <!-- Section Header -->
+      <header class="border-b border-base-200 pb-4">
+        <h1 class="text-4xl font-extrabold tracking-tight mb-1 text-base-content">Profile</h1>
+        <p class="text-sm text-base-content/60 font-medium">
+          Manage your account details and preferences.
+        </p>
+      </header>
+
+      <!-- Profile Grid Blocks -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Full Name Info Block -->
+        <div
+          class="card bg-base-100 border border-base-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+        >
+          <span class="text-xs font-bold uppercase tracking-wider text-base-content/40 mb-1 block"
             >Full Name</span
           >
-          <p class="text-xl font-bold">{{ authStore.user()?.name }}</p>
+          <p class="text-lg font-semibold text-base-content">{{ authStore.user()?.name }}</p>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 p-8 rounded-4xl shadow-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block"
+        <!-- Email Address Info Block -->
+        <div
+          class="card bg-base-100 border border-base-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+        >
+          <span class="text-xs font-bold uppercase tracking-wider text-base-content/40 mb-1 block"
             >Email Address</span
           >
-          <p class="text-xl font-bold">{{ authStore.user()?.email }}</p>
+          <p class="text-lg font-semibold text-base-content">{{ authStore.user()?.email }}</p>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 p-8 rounded-4xl shadow-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block"
+        <!-- Joined On Info Block -->
+        <div
+          class="card bg-base-100 border border-base-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+        >
+          <span class="text-xs font-bold uppercase tracking-wider text-base-content/40 mb-1 block"
             >Joined On</span
           >
-          <p class="text-xl font-bold">{{ authStore.user()?.createdAt | date: 'longDate' }}</p>
+          <p class="text-lg font-semibold text-base-content">
+            {{ authStore.user()?.createdAt | date: 'longDate' }}
+          </p>
         </div>
 
-        <div class="card bg-base-100 border border-base-200 p-8 rounded-4xl shadow-sm">
-          <span class="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block"
+        <!-- Account Security Info Block -->
+        <div
+          class="card bg-base-100 border border-base-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+        >
+          <span class="text-xs font-bold uppercase tracking-wider text-base-content/40 mb-2 block"
             >Account Security</span
           >
-          <p class="text-sm font-bold text-success flex items-center gap-2">
+          <p
+            class="text-sm font-semibold text-success flex items-center gap-2 bg-success/10 px-3 py-1.5 rounded-xl w-fit"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -57,7 +87,7 @@
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="3"
+              stroke-width="2.5"
               stroke-linecap="round"
               stroke-linejoin="round"
             >
@@ -66,126 +96,378 @@
             Active & Verified
           </p>
         </div>
-      </div>
+      </section>
 
-      @if (authStore.isAdmin()) {
-        <div class="card bg-primary/5 border border-primary/10 p-8 rounded-[2.5rem]">
-          <div class="flex items-center justify-between">
+      <!-- Admin Conditional Section -->
+      @if (!authStore.isAdmin()) {
+        <section class="card bg-primary/5 border border-primary/10 p-6 rounded-2xl shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h3 class="text-xl font-black mb-1">Your Collections</h3>
-              <p class="text-sm opacity-60">View your order history and track active deliveries.</p>
+              <h3 class="text-lg font-bold text-primary mb-0.5">Your Collections</h3>
+              <p class="text-sm text-base-content/70">
+                View your order history and track active deliveries.
+              </p>
             </div>
-            <button class="btn btn-primary rounded-2xl px-8" routerLink="/orders">Orders</button>
+            <button
+              class="btn btn-primary rounded-xl px-6 font-semibold shadow-sm hover:shadow-md transition-all self-start sm:self-auto"
+              routerLink="/orders"
+            >
+              Orders
+            </button>
           </div>
-        </div>
+        </section>
       }
 
-      <!-- Security Section -->
-      <div class="card bg-base-100 border border-base-200 p-8 rounded-[2.5rem] shadow-sm">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-4">
-            <div class="p-3 bg-base-200 rounded-2xl text-primary">
-              <svg lucideLock size="24" strokeWidth="2.5" class="text-primary"></svg>
+      <!-- Addresses Feature Section -->
+      <section class="card bg-base-100 border border-base-200 p-6 rounded-3xl shadow-sm">
+        <header class="flex items-center justify-between border-b border-base-100 pb-4 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 bg-base-200 rounded-xl text-primary shadow-inner">
+              <svg lucideMapPin size="20" strokeWidth="2.5"></svg>
             </div>
             <div>
-              <h3 class="text-xl font-black">Security</h3>
-              <p class="text-sm opacity-50">Manage your password and account security</p>
+              <h3 class="text-lg font-bold text-base-content">Addresses</h3>
+              <p class="text-xs text-base-content/50">Manage your shipping destinations</p>
             </div>
           </div>
-          <button (click)="togglePasswordForm()" class="btn btn-ghost btn-sm rounded-xl">
-            {{ showPasswordForm() ? 'Cancel' : 'Update Password' }}
+          <button
+            (click)="toggleAddressForm()"
+            class="btn btn-ghost btn-sm rounded-xl font-semibold gap-1"
+          >
+            <svg [lucideIcon]="showAddressForm() ? LucideRotateCcw : LucidePlus" size="16"></svg>
+            {{ showAddressForm() ? 'Cancel' : 'Add New' }}
           </button>
-        </div>
+        </header>
 
-        @if (showPasswordForm()) {
-          <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="form-control w-full">
-                <label class="label">
+        <!-- Address Entry Form -->
+        @if (showAddressForm()) {
+          <form [formGroup]="addressForm" (ngSubmit)="onSubmitAddress()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-control w-full md:col-span-2">
+                <label class="label py-1">
                   <span
-                    class="label-text font-black uppercase text-[10px] tracking-widest opacity-40"
+                    class="label-text font-bold uppercase text-[10px] tracking-wider text-base-content/60"
+                    >Street Address</span
                   >
-                    Current Password
-                  </span>
                 </label>
                 <input
-                  type="password"
-                  formControlName="currentPassword"
-                  placeholder="••••••••"
-                  class="input input-bordered rounded-2xl bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-
-              <div class="form-control w-full md:col-start-1">
-                <label class="label">
-                  <span
-                    class="label-text font-black uppercase text-[10px] tracking-widest opacity-40"
-                  >
-                    New Password
-                  </span>
-                </label>
-                <input
-                  type="password"
-                  formControlName="newPassword"
-                  placeholder="••••••••"
-                  class="input input-bordered rounded-2xl bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20"
+                  type="text"
+                  formControlName="street"
+                  placeholder="123 Street Name"
+                  class="input input-bordered rounded-xl bg-base-200/40 border-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all w-full"
                 />
               </div>
 
               <div class="form-control w-full">
-                <label class="label">
+                <label class="label py-1">
                   <span
-                    class="label-text font-black uppercase text-[10px] tracking-widest opacity-40"
+                    class="label-text font-bold uppercase text-[10px] tracking-wider text-base-content/60"
+                    >City</span
                   >
-                    Confirm New Password
-                  </span>
                 </label>
                 <input
-                  type="password"
-                  formControlName="confirmPassword"
-                  placeholder="••••••••"
-                  class="input input-bordered rounded-2xl bg-base-200/50 border-none focus:ring-2 focus:ring-primary/20"
+                  type="text"
+                  formControlName="city"
+                  placeholder="City"
+                  class="input input-bordered rounded-xl bg-base-200/40 border-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all w-full"
                 />
-                @if (
-                  passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched
-                ) {
-                  <label class="label">
-                    <span class="label-text-alt text-error font-bold">Passwords do not match</span>
-                  </label>
-                }
+              </div>
+
+              <div class="form-control w-full">
+                <label class="label py-1">
+                  <span
+                    class="label-text font-bold uppercase text-[10px] tracking-wider text-base-content/60"
+                    >State / Province</span
+                  >
+                </label>
+                <input
+                  type="text"
+                  formControlName="state"
+                  placeholder="State"
+                  class="input input-bordered rounded-xl bg-base-200/40 border-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all w-full"
+                />
+              </div>
+
+              <div class="form-control w-full">
+                <label class="label py-1">
+                  <span
+                    class="label-text font-bold uppercase text-[10px] tracking-wider text-base-content/60"
+                    >Zip / Postal Code</span
+                  >
+                </label>
+                <input
+                  type="text"
+                  formControlName="zipCode"
+                  placeholder="00000"
+                  class="input input-bordered rounded-xl bg-base-200/40 border-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all w-full"
+                />
+              </div>
+
+              <div class="form-control w-full">
+                <label class="label py-1">
+                  <span
+                    class="label-text font-bold uppercase text-[10px] tracking-wider text-base-content/60"
+                    >Country</span
+                  >
+                </label>
+                <input
+                  type="text"
+                  formControlName="country"
+                  placeholder="Country"
+                  class="input input-bordered rounded-xl bg-base-200/40 border-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all w-full"
+                />
+              </div>
+
+              <div class="form-control w-full md:col-span-2">
+                <label class="label py-1">
+                  <span
+                    class="label-text font-bold uppercase text-[10px] tracking-wider text-base-content/60"
+                    >Phone Number</span
+                  >
+                </label>
+                <input
+                  type="text"
+                  formControlName="phone"
+                  placeholder="+1..."
+                  class="input input-bordered rounded-xl bg-base-200/40 border-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all w-full"
+                />
+              </div>
+
+              <div class="form-control md:col-span-2 pt-2">
+                <label class="label cursor-pointer justify-start gap-3 select-none">
+                  <input
+                    type="checkbox"
+                    formControlName="isDefault"
+                    class="checkbox checkbox-primary rounded-md checkbox-sm"
+                  />
+                  <span class="label-text font-semibold text-sm text-base-content"
+                    >Set as default shipping address</span
+                  >
+                </label>
               </div>
             </div>
 
-            <div class="flex justify-end pt-4">
+            <div class="flex justify-end pt-2 border-t border-base-200">
               <button
                 type="submit"
-                [disabled]="passwordForm.invalid || authStore.loading()"
-                class="btn btn-primary rounded-2xl px-12 relative overflow-hidden group"
+                [disabled]="addressForm.invalid || loading()"
+                class="btn btn-primary rounded-xl px-8 font-semibold shadow-sm shadow-primary/20"
               >
-                <span class="relative z-10 flex items-center gap-2">
-                  @if (authStore.loading()) {
+                <span class="flex items-center gap-2">
+                  @if (loading()) {
                     <span class="loading loading-spinner loading-xs"></span>
-                  } @else {
-                    <svg lucideKeyRound size="18"></svg>
                   }
-                  Update Password
+                  {{ editingAddressId() ? 'Update' : 'Save' }} Address
                 </span>
               </button>
             </div>
           </form>
         } @else {
-          <div
-            class="p-6 bg-base-200/30 rounded-2xl flex items-center justify-between border border-dashed border-base-300"
+          <!-- Saved Address Feed Loop -->
+          <div class="space-y-3">
+            @for (address of addresses(); track address._id) {
+              <div
+                class="p-5 bg-base-200/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between border border-base-200 hover:border-primary/40 hover:bg-base-200/50 transition-all duration-200 group gap-4"
+              >
+                <div class="flex items-start gap-3.5">
+                  <div class="mt-0.5">
+                    <div
+                      class="p-2 bg-base-200 border border-base-300 rounded-xl transition-colors"
+                      [class.bg-primary/10]="address.isDefault"
+                      [class.border-primary/20]="address.isDefault"
+                    >
+                      <svg
+                        lucideMapPin
+                        size="16"
+                        [class.text-primary]="address.isDefault"
+                        class="opacity-70"
+                      ></svg>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                      <p class="font-bold text-base-content text-sm md:text-base">
+                        {{ address.street }}
+                      </p>
+                      @if (address.isDefault) {
+                        <span
+                          class="badge badge-primary font-bold text-[9px] uppercase tracking-wider px-2 py-1.5 h-auto"
+                          >Default</span
+                        >
+                      }
+                    </div>
+                    <p class="text-sm text-base-content/60 font-medium">
+                      {{ address.city }}, {{ address.state }} {{ address.zipCode }},
+                      {{ address.country }}
+                    </p>
+                    @if (address.phone) {
+                      <p
+                        class="text-[10px] font-bold text-base-content/40 mt-1 uppercase tracking-wider flex items-center gap-1"
+                      >
+                        <span>📞</span> {{ address.phone }}
+                      </p>
+                    }
+                  </div>
+                </div>
+
+                <!-- Action Tools -->
+                <div
+                  class="flex items-center gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity self-end sm:self-auto border-t sm:border-t-0 pt-2 sm:pt-0 border-base-200 w-full sm:w-auto justify-end"
+                >
+                  @if (!address.isDefault) {
+                    <button
+                      (click)="onSetDefault(address._id!)"
+                      class="btn btn-ghost btn-xs btn-square rounded-lg tooltip"
+                      data-tip="Set as Default"
+                    >
+                      <svg lucideCheck size="14" class="text-success"></svg>
+                    </button>
+                  }
+                  <button
+                    (click)="toggleAddressForm(address)"
+                    class="btn btn-ghost btn-xs btn-square rounded-lg text-base-content/70"
+                  >
+                    <svg lucidePencil size="14"></svg>
+                  </button>
+                  <button
+                    (click)="onDeleteAddress(address._id!)"
+                    class="btn btn-ghost btn-xs btn-square rounded-lg text-error"
+                  >
+                    <svg lucideTrash2 size="14"></svg>
+                  </button>
+                </div>
+              </div>
+            } @empty {
+              <!-- Fallback Empty State Window -->
+              <div
+                class="p-10 bg-base-200/20 rounded-2xl text-center border border-dashed border-base-300"
+              >
+                <div
+                  class="bg-base-200 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-base-300"
+                >
+                  <svg lucideMapPin size="22" class="opacity-40 text-base-content"></svg>
+                </div>
+                <h4 class="font-bold text-base-content/70 text-sm">No saved locations</h4>
+                <p class="text-xs text-base-content/40 max-w-xs mx-auto mt-1">
+                  Add a valid shipping physical destination location to accelerate your checkout
+                  sequence interface workflow.
+                </p>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- Account Security Component Section -->
+      <section class="card bg-base-100 border border-base-200 p-6 rounded-3xl shadow-sm">
+        <header class="flex items-center justify-between border-b border-base-100 pb-4 mb-6">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 bg-base-200 rounded-xl text-primary shadow-inner">
+              <svg lucideLock size="20" strokeWidth="2.5"></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-base-content">Security Architecture</h3>
+              <p class="text-xs text-base-content/50">Manage credential security parameters</p>
+            </div>
+          </div>
+          <button
+            (click)="togglePasswordForm()"
+            class="btn btn-ghost btn-sm rounded-xl font-semibold"
           >
-            <div class="flex items-center gap-3 opacity-50">
-              <svg lucideShieldCheck size="20"></svg>
-              <span class="text-sm font-medium"
-                >Your account is secured with a strong password</span
+            {{ showPasswordForm() ? 'Cancel' : 'Update Password' }}
+          </button>
+        </header>
+
+        @if (showPasswordForm()) {
+          <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()" class="space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-control w-full md:col-span-2">
+                <label class="label py-1">
+                  <span
+                    class="label-text font-bold uppercase text-[10px] tracking-wider text-base-content/60"
+                    >Current Authentication Code</span
+                  >
+                </label>
+                <input
+                  type="password"
+                  formControlName="currentPassword"
+                  placeholder="••••••••"
+                  class="input input-bordered rounded-xl bg-base-200/40 border-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all w-full"
+                />
+              </div>
+
+              <div class="form-control w-full">
+                <label class="label py-1">
+                  <span
+                    class="label-text font-bold uppercase text-[10px] tracking-wider text-base-content/60"
+                    >New Generated Password</span
+                  >
+                </label>
+                <input
+                  type="password"
+                  formControlName="newPassword"
+                  placeholder="••••••••"
+                  class="input input-bordered rounded-xl bg-base-200/40 border-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all w-full"
+                />
+              </div>
+
+              <div class="form-control w-full">
+                <label class="label py-1">
+                  <span
+                    class="label-text font-bold uppercase text-[10px] tracking-wider text-base-content/60"
+                    >Confirm New Mutation Identity</span
+                  >
+                </label>
+                <input
+                  type="password"
+                  formControlName="confirmPassword"
+                  placeholder="••••••••"
+                  class="input input-bordered rounded-xl bg-base-200/40 border-base-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all w-full"
+                />
+                @if (
+                  passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched
+                ) {
+                  <label class="label py-1">
+                    <span class="label-text-alt text-error font-semibold flex items-center gap-1"
+                      >⚠️ Input elements mismatch</span
+                    >
+                  </label>
+                }
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-base-200">
+              <button
+                type="submit"
+                [disabled]="passwordForm.invalid || authStore.loading()"
+                class="btn btn-primary rounded-xl px-8 font-semibold shadow-sm"
+              >
+                <span class="flex items-center gap-2">
+                  @if (authStore.loading()) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                  } @else {
+                    <svg lucideKeyRound size="16"></svg>
+                  }
+                  Commit New Password
+                </span>
+              </button>
+            </div>
+          </form>
+        } @else {
+          <!-- Passive Safe Security Indicator Block -->
+          <div
+            class="p-4 bg-success/5 rounded-xl flex items-center justify-between border border-success/20"
+          >
+            <div class="flex items-center gap-3 text-success">
+              <svg lucideShieldCheck size="18" strokeWidth="2.5"></svg>
+              <span class="text-sm font-semibold"
+                >Your profile node configuration framework is guarded via encrypted token string
+                matrices.</span
               >
             </div>
           </div>
         }
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
 </div>

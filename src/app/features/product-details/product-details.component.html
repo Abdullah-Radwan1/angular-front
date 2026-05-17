@@ -20,20 +20,20 @@
           <div class="flex items-center gap-2 mb-2">
             <div class="flex gap-1">
               <span class="badge badge-outline badge-sm opacity-50">{{
-                product.category.name || 'Collection'
+                product.category?.name || 'Collection'
               }}</span>
               @if (product.subcategory) {
                 <span class="badge badge-outline badge-sm opacity-50">{{
-                  product.subcategory.name || 'Collection'
+                  product.subcategory?.name || 'Collection'
                 }}</span>
               }
             </div>
-            @if (getTotalStock(product) === 0) {
+            @if (getSelectedVariantStock() === 0) {
               <span class="badge badge-error badge-sm">Out of Stock</span>
-            } @else if (getTotalStock(product) <= 3) {
-              <span class="badge badge-warning badge-sm">Low Stock</span>
+            } @else if (getSelectedVariantStock() <= 3) {
+              <span class="badge badge-warning badge-sm">Low Stock ({{ getSelectedVariantStock() }} left)</span>
             } @else {
-              <span class="badge badge-success badge-sm">In Stock</span>
+              <span class="badge badge-success badge-sm">In Stock ({{ getSelectedVariantStock() }} available)</span>
             }
           </div>
           <h1 class="text-4xl lg:text-5xl font-black mb-4">{{ product.name }}</h1>
@@ -129,7 +129,7 @@
                       type="button"
                       class="btn btn-ghost btn-sm btn-square"
                       (click)="cartForm.patchValue({ quantity: cartForm.value.quantity + 1 })"
-                      [disabled]="cartForm.value.quantity >= getTotalStock(product)"
+                      [disabled]="cartForm.value.quantity >= getSelectedVariantStock()"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

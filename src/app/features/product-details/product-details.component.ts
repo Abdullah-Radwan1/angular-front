@@ -7,6 +7,7 @@ import { Product, AddToCartRequest } from '../../shared/models/api-response-mode
 import { AuthStore } from '../../store/auth.store';
 import { CartStore } from '../../store/cart.store';
 import { ProductCardComponent } from '../../shared/components/product-card/product.card.component';
+import { NotificationService } from '../../shared/services/notification.service';
 
 @Component({
   selector: 'app-product-details',
@@ -27,6 +28,7 @@ export class ProductDetailsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly apiService = inject(ApiService);
+  private readonly notificationService = inject(NotificationService);
   readonly authStore = inject(AuthStore);
   readonly cartStore = inject(CartStore);
 
@@ -98,13 +100,32 @@ export class ProductDetailsComponent implements OnInit {
 
   selectColor(color: string): void {
     this.selectedColor.set(color);
+    const variant = this.product()?.variants?.find((v) => v.color === color);
+    const stock = variant ? variant.stock : 0;
+    if (this.cartForm.value.quantity > stock) {
+      this.cartForm.patchValue({ quantity: Math.max(1, stock) });
+    }
+  }
+
+  getSelectedVariantStock(): number {
+    const product = this.product();
+    if (!product || !product.variants) return 0;
+    const variant = product.variants.find((v) => v.color === this.selectedColor());
+    return variant ? variant.stock : 0;
   }
 
   async addToCart(): Promise<void> {
     if (this.cartForm.invalid || !this.product()) return;
 
-    this.isAdding.set(true);
     const { quantity } = this.cartForm.value;
+    const stock = this.getSelectedVariantStock();
+
+    if (quantity > stock) {
+      this.notificationService.error(`Only ${stock} items are available in stock for this variant.`);
+      return;
+    }
+
+    this.isAdding.set(true);
 
     try {
       // We add a small artificial delay so the user can actually see the "Adding..." state.

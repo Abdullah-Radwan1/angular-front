@@ -4,6 +4,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { User } from '../../../shared/models/user.model';
 import { PaginatedResponse } from '../../../shared/models/api-response-model';
+import { AddressService, Address } from '../../../shared/services/address.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -15,6 +16,11 @@ import { PaginatedResponse } from '../../../shared/models/api-response-model';
 export class AdminUsersComponent implements OnInit {
   users = signal<User[]>([]);
 
+  // Address modal states
+  selectedUser = signal<User | null>(null);
+  userAddresses = signal<Address[]>([]);
+  loadingAddresses = signal(false);
+
   // Filters & Pagination
   searchQuery = signal('');
   roleFilter = signal('all'); // 'all', 'admin', 'user'
@@ -25,6 +31,7 @@ export class AdminUsersComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private notificationService: NotificationService,
+    private addressService: AddressService,
   ) {}
 
   ngOnInit(): void {
@@ -98,5 +105,28 @@ export class AdminUsersComponent implements OnInit {
         error: () => this.notificationService.error(`Failed to ${action} user`),
       });
     }
+  }
+
+  viewAddresses(user: User): void {
+    this.selectedUser.set(user);
+    this.loadingAddresses.set(true);
+    this.userAddresses.set([]);
+
+    this.addressService.getUserAddresses(user._id).subscribe({
+      next: (res) => {
+        this.userAddresses.set(res.data.addresses);
+        this.loadingAddresses.set(false);
+      },
+      error: () => {
+        this.notificationService.error('Failed to load user addresses');
+        this.loadingAddresses.set(false);
+        this.selectedUser.set(null);
+      },
+    });
+  }
+
+  closeAddressesModal(): void {
+    this.selectedUser.set(null);
+    this.userAddresses.set([]);
   }
 }

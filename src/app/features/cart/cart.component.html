@@ -41,9 +41,17 @@
             <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
               <div class="space-y-1">
                 <h2
-                  class="font-bold text-xl leading-tight text-base-content group-hover:text-primary transition-colors"
+                  class="font-bold text-xl leading-tight text-base-content group-hover:text-primary transition-colors flex items-center gap-2 justify-center md:justify-start flex-wrap"
                 >
                   {{ item.product.name }}
+                  @if (item.color) {
+                    <span
+                      class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-white shadow-sm border border-black/10"
+                      [style.background]="item.color"
+                    >
+                      {{ item.color }}
+                    </span>
+                  }
                 </h2>
                 <p class="text-sm text-base-content/60 line-clamp-2 max-w-md italic">
                   {{ item.product.description }}
@@ -83,7 +91,7 @@
           <div class="flex items-center bg-base-200 rounded-2xl p-1.5 gap-1 border border-base-300">
             <button
               class="btn btn-ghost btn-sm btn-square hover:bg-base-100"
-              (click)="decrease(item.product._id, item.quantity)"
+              (click)="decrease(item.product._id, item.quantity, item.color)"
             >
               <svg lucideMinus [size]="16" class="text-base-content/70"></svg>
             </button>
@@ -94,7 +102,8 @@
 
             <button
               class="btn btn-ghost btn-sm btn-square hover:bg-base-100 text-primary"
-              (click)="increase(item.product._id)"
+              (click)="increase(item.product._id, item.color)"
+              [disabled]="item.quantity >= getProductStock(item.product, item.color)"
             >
               <svg lucidePlus [size]="16"></svg>
             </button>
@@ -102,7 +111,7 @@
 
           <button
             class="btn btn-ghost btn-circle text-error/30 hover:text-error hover:bg-error/10 transition-all"
-            (click)="remove(item.product._id)"
+            (click)="remove(item.product._id, item.color)"
           >
             <svg lucideTrash2 [size]="20"></svg>
           </button>

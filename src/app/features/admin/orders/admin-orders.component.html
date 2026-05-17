@@ -30,12 +30,14 @@
                 class="select select-bordered select-sm mb-2"
                 [value]="order.status"
                 (change)="updateOrderStatus(order, $any($event.target).value)"
+                [disabled]="order.status === 'recieved' || order.status === 'cancelled by admin' || order.status === 'canceled by user'"
               >
                 <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
+                <option value="preparing">Preparing</option>
                 <option value="shipped">Shipped</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="delivered">Delivered</option>
+                <option value="recieved">Recieved</option>
+                <option value="cancelled by admin">Cancelled by Admin</option>
+                <option value="canceled by user">Canceled by User</option>
               </select>
               <p class="text-lg font-semibold">${{ order.totalPrice }}</p>
             </div>

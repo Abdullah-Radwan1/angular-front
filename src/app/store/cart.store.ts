@@ -141,27 +141,54 @@ export const CartStore = signalStore(
       loadCart,
 
       // ------------------------------------------------------
-      // ADD TO CART (DEBOUNCED)
+      // ADD TO CART
       // ------------------------------------------------------
-      addToCart: async (productOrId: Product | string, quantity = 1) => {
+      addToCart: async (productOrId: Product | string, quantity = 1, color?: string) => {
         const productId = typeof productOrId === 'string' ? productOrId : productOrId._id;
-        // Optimistic update
         const currentCart = store.cart();
-        const existingItemIndex = currentCart.findIndex((item) => item.product._id === productId);
+        const existingItemIndex = currentCart.findIndex(
+          (item) => item.product._id === productId && (item.color || '').toLowerCase() === (color || '').toLowerCase()
+        );
+
+        let targetStock = 0;
+        let product: Product | undefined;
+        if (existingItemIndex > -1) {
+          product = currentCart[existingItemIndex].product;
+        } else if (typeof productOrId !== 'string') {
+          product = productOrId;
+        }
+
+        if (product && product.variants) {
+          if (color) {
+            const variant = product.variants.find((v) => v.color.toLowerCase() === color.toLowerCase());
+            targetStock = variant ? variant.stock : 0;
+          } else {
+            targetStock = product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+          }
+        }
 
         if (existingItemIndex > -1) {
+          const newQuantity = currentCart[existingItemIndex].quantity + quantity;
+          if (newQuantity > targetStock) {
+            notification.error(`Cannot add more items. Only ${targetStock} available in stock for this color.`);
+            return;
+          }
           const newCart = [...currentCart];
           newCart[existingItemIndex] = {
             ...newCart[existingItemIndex],
-            quantity: newCart[existingItemIndex].quantity + quantity,
+            quantity: newQuantity,
           };
           patchState(store, { cart: newCart });
           saveCart(newCart);
         } else if (typeof productOrId !== 'string') {
-          // New item with full product info (Optimistic)
+          if (quantity > targetStock) {
+            notification.error(`Only ${targetStock} items are available in stock for this color.`);
+            return;
+          }
           const newItem: CartItem = {
             product: productOrId,
             quantity: quantity,
+            color: color || '',
             priceAtAdd: productOrId.price,
             isPriceChanged: false,
           };
@@ -170,27 +197,32 @@ export const CartStore = signalStore(
           saveCart(newCart);
         }
 
-        // Always track delta and trigger debounce
-        const currentDelta = pendingDeltas.get(productId) || 0;
-        if (currentDelta !== -999) {
-          pendingDeltas.set(productId, currentDelta + quantity);
-          syncSubject.next(productId);
+        if (!isAuthenticated()) return;
+        try {
+          await firstValueFrom(cartService.addToCart(productId, quantity, color));
+          notification.success('Cart updated successfully');
+        } catch (err) {
+          notification.error('Failed to sync cart update');
         }
       },
 
       // ------------------------------------------------------
-      // REMOVE ITEM (DEBOUNCED)
+      // REMOVE ITEM
       // ------------------------------------------------------
-      removeFromCart: async (productId: string) => {
-        // Optimistic update
-        const newCart = store.cart().filter((item) => item.product._id !== productId);
+      removeFromCart: async (productId: string, color?: string) => {
+        const newCart = store.cart().filter(
+          (item) => !(item.product._id === productId && (item.color || '').toLowerCase() === (color || '').toLowerCase())
+        );
         patchState(store, { cart: newCart });
         saveCart(newCart);
 
-        // Mark for removal and trigger debounce
-        pendingDeltas.set(productId, -999);
-        syncSubject.next(productId);
-        notification.success('Item removed');
+        if (!isAuthenticated()) return;
+        try {
+          await firstValueFrom(cartService.removeFromCart(productId, color));
+          notification.success('Item removed');
+        } catch (err) {
+          notification.error('Failed to sync cart removal');
+        }
       },
 
       // ------------------------------------------------------

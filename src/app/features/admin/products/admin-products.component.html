@@ -94,7 +94,9 @@
       <select class="select select-bordered w-full" (change)="onFilterCategory($event)">
         <option value="">All Categories</option>
         @for (cat of mainCategories(); track cat._id) {
-          <option [value]="cat._id" [selected]="categoryFilter() === cat._id">{{ cat.name }}</option>
+          <option [value]="cat._id" [selected]="categoryFilter() === cat._id">
+            {{ cat.name }}
+          </option>
         }
       </select>
     </div>
@@ -107,7 +109,9 @@
         <select class="select select-bordered w-full" (change)="onFilterSubcategory($event)">
           <option value="">All Subcategories</option>
           @for (cat of filterSubCategories(); track cat._id) {
-            <option [value]="cat._id" [selected]="subcategoryFilter() === cat._id">{{ cat.name }}</option>
+            <option [value]="cat._id" [selected]="subcategoryFilter() === cat._id">
+              {{ cat.name }}
+            </option>
           }
         </select>
       </div>

@@ -8,6 +8,7 @@ export interface CartItem {
 
   // 🔥 If the price changed
   isPriceChanged: boolean;
+  color?: string;
 }
 
 export interface Cart {

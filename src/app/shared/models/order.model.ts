@@ -7,6 +7,7 @@ export interface OrderItem {
   name: string;
   imageUrl: string;
   category: string;
+  color?: string;
   quantity: number;
   price: number;
 }
@@ -18,7 +19,7 @@ export interface Order {
   totalPrice: number;
   hasRefundRequest?: boolean;
   refundStatus?: 'none' | 'pending' | 'approved' | 'rejected';
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'; // Added 'delivered' if used
+  status: 'pending' | 'preparing' | 'shipped' | 'recieved' | 'cancelled by admin' | 'canceled by user';
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;

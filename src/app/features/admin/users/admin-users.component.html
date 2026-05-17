@@ -70,6 +70,14 @@
               <td>
                 <div class="flex justify-end gap-2">
                   <button
+                    class="btn btn-sm btn-ghost text-primary hover:bg-primary/10 gap-1.5"
+                    [disabled]="user.isDeleted"
+                    (click)="viewAddresses(user)"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Addresses
+                  </button>
+                  <button
                     class="btn btn-sm btn-outline"
                     [class.btn-error]="!user.isDeleted"
                     [class.btn-success]="user.isDeleted"
@@ -113,4 +121,73 @@
       </div>
     </div>
   </div>
+
+  <!-- Addresses Modal -->
+  @if (selectedUser()) {
+    <div class="modal modal-open animate-fade-in" role="dialog">
+      <div class="modal-box max-w-lg rounded-[2rem] border border-base-200 shadow-2xl p-6 bg-base-100 relative">
+        <button
+          class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
+          (click)="closeAddressesModal()"
+        >
+          ✕
+        </button>
+
+        <h3 class="text-2xl font-black mb-1 flex items-center gap-2 text-base-content">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          User Addresses
+        </h3>
+        <p class="text-xs opacity-50 mb-6 font-medium">Viewing addresses for <span class="font-bold text-base-content">{{ selectedUser()?.name }}</span></p>
+
+        @if (loadingAddresses()) {
+          <div class="flex flex-col items-center justify-center py-12 gap-3">
+            <span class="loading loading-spinner loading-md text-primary"></span>
+            <span class="text-xs font-semibold opacity-40">Retrieving location records...</span>
+          </div>
+        } @else {
+          <div class="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+            @for (address of userAddresses(); track address._id) {
+              <div class="p-4 bg-base-200/40 rounded-2xl border border-base-200 hover:border-primary/20 transition-all">
+                <div class="flex items-start gap-3">
+                  <div class="p-2 bg-base-200 border border-base-300 rounded-xl" [class.bg-primary/10]="address.isDefault" [class.border-primary/20]="address.isDefault">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="opacity-70" [class.text-primary]="address.isDefault"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                      <p class="font-bold text-base-content text-sm truncate">{{ address.street }}</p>
+                      @if (address.isDefault) {
+                        <span class="badge badge-primary font-bold text-[8px] uppercase tracking-wider px-1.5 py-0.5 h-auto">Default</span>
+                      }
+                    </div>
+                    <p class="text-xs text-base-content/60 font-medium leading-relaxed">
+                      {{ address.city }}, {{ address.state }} {{ address.zipCode }}, {{ address.country }}
+                    </p>
+                    @if (address.phone) {
+                      <p class="text-[9px] font-bold text-base-content/40 mt-1 uppercase tracking-wider">
+                        📞 {{ address.phone }}
+                      </p>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @empty {
+              <div class="p-8 bg-base-200/20 rounded-2xl text-center border border-dashed border-base-300">
+                <div class="bg-base-200 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-base-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-45 text-base-content"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <h4 class="font-bold text-base-content/70 text-sm">No saved locations</h4>
+                <p class="text-xs text-base-content/40 max-w-xs mx-auto mt-1">This user hasn't added any shipping locations yet.</p>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="modal-action mt-6 border-t border-base-200 pt-4 flex justify-end">
+          <button class="btn btn-ghost rounded-xl px-6 font-semibold" (click)="closeAddressesModal()">Close</button>
+        </div>
+      </div>
+      <div class="modal-backdrop bg-black/45 backdrop-blur-xs" (click)="closeAddressesModal()"></div>
+    </div>
+  }
 </div>
+

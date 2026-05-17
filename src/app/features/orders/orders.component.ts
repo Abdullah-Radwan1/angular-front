@@ -137,10 +137,11 @@ export class OrdersComponent implements OnInit {
   getStatusClass(status: string): string {
     const classes = {
       pending: 'badge-warning',
-      paid: 'badge-info',
+      preparing: 'badge-info',
       shipped: 'badge-primary',
-      delivered: 'badge-success',
-      cancelled: 'badge-error',
+      recieved: 'badge-success',
+      'cancelled by admin': 'badge-error',
+      'canceled by user': 'badge-error',
     };
     return classes[status as keyof typeof classes] || 'badge-neutral';
   }
@@ -148,10 +149,11 @@ export class OrdersComponent implements OnInit {
   getStatusIcon(status: string): string {
     const icons = {
       pending: 'clock',
-      paid: 'dollarSign',
+      preparing: 'clock',
       shipped: 'truck',
-      delivered: 'checkCircle',
-      cancelled: 'xCircle',
+      recieved: 'checkCircle',
+      'cancelled by admin': 'xCircle',
+      'canceled by user': 'xCircle',
     };
     return icons[status as keyof typeof icons] || 'package';
   }
@@ -159,10 +161,11 @@ export class OrdersComponent implements OnInit {
   getStatusColor(status: string): string {
     const colors = {
       pending: 'text-warning',
-      paid: 'text-info',
+      preparing: 'text-info',
       shipped: 'text-primary',
-      delivered: 'text-success',
-      cancelled: 'text-error',
+      recieved: 'text-success',
+      'cancelled by admin': 'text-error',
+      'canceled by user': 'text-error',
     };
     return colors[status as keyof typeof colors] || 'text-base-content';
   }
@@ -178,6 +181,21 @@ export class OrdersComponent implements OnInit {
     this.selectedStatus.set(status);
     this.currentPage.set(1);
   }
+
+  cancelOrder(order: Order): void {
+    if (confirm('Are you sure you want to cancel this order?')) {
+      this.apiService.patch(`/orders/${order._id}/cancel`, {}).subscribe({
+        next: () => {
+          this.notificationService.success('Order cancelled successfully');
+          this.loadOrders();
+        },
+        error: (err) => {
+          this.notificationService.error(err.error?.message || 'Failed to cancel order');
+        },
+      });
+    }
+  }
+
 
   refreshOrders(): void {
     this.loadOrders();
