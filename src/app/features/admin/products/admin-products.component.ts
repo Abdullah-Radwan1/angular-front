@@ -119,6 +119,7 @@ export class AdminProductsComponent implements OnInit {
       // Join colors for display and get total stock
       const displayData = {
         ...product,
+        category: (product.category as any)?._id || product.category,
         colors: product.variants?.map((v) => v.color).join(', ') || '',
         stock: this.getTotalStock(product),
       };
@@ -200,7 +201,7 @@ export class AdminProductsComponent implements OnInit {
 
     request$.subscribe({
       next: (res: any) => {
-        const updatedProduct = res.data;
+        const updatedProduct = res.data || res;
 
         if (isEditing) {
           this.products.update((products) =>
