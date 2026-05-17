@@ -7,7 +7,6 @@ export interface OrderItem {
   name: string;
   imageUrl: string;
   category: string;
-  color?: string;
   quantity: number;
   price: number;
 }

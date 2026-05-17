@@ -51,28 +51,19 @@ export class CartComponent implements OnInit {
     this.cartStore.loadCart();
   }
 
-  getProductStock(product: any, color?: string): number {
-    if (!product.variants || product.variants.length === 0) return 0;
-    if (color) {
-      const variant = product.variants.find((v: any) => v.color.toLowerCase() === color.toLowerCase());
-      return variant ? variant.stock : 0;
-    }
-    return product.variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+  remove(id: string) {
+    this.cartStore.removeFromCart(id);
   }
 
-  remove(id: string, color?: string) {
-    this.cartStore.removeFromCart(id, color);
+  increase(id: string) {
+    this.cartStore.addToCart(id, 1);
   }
 
-  increase(id: string, color?: string) {
-    this.cartStore.addToCart(id, 1, color);
-  }
-
-  decrease(id: string, quantity: number, color?: string) {
+  decrease(id: string, quantity: number) {
     if (quantity <= 1) {
-      this.remove(id, color);
+      this.remove(id);
     } else {
-      this.cartStore.addToCart(id, -1, color);
+      this.cartStore.addToCart(id, -1);
     }
   }
 

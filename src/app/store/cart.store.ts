@@ -143,11 +143,11 @@ export const CartStore = signalStore(
       // ------------------------------------------------------
       // ADD TO CART
       // ------------------------------------------------------
-      addToCart: async (productOrId: Product | string, quantity = 1, color?: string) => {
+      addToCart: async (productOrId: Product | string, quantity = 1) => {
         const productId = typeof productOrId === 'string' ? productOrId : productOrId._id;
         const currentCart = store.cart();
         const existingItemIndex = currentCart.findIndex(
-          (item) => item.product._id === productId && (item.color || '').toLowerCase() === (color || '').toLowerCase()
+          (item) => item.product._id === productId
         );
 
         let targetStock = 0;
@@ -158,19 +158,14 @@ export const CartStore = signalStore(
           product = productOrId;
         }
 
-        if (product && product.variants) {
-          if (color) {
-            const variant = product.variants.find((v) => v.color.toLowerCase() === color.toLowerCase());
-            targetStock = variant ? variant.stock : 0;
-          } else {
-            targetStock = product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
-          }
+        if (product) {
+          targetStock = product.stock || 0;
         }
 
         if (existingItemIndex > -1) {
           const newQuantity = currentCart[existingItemIndex].quantity + quantity;
           if (newQuantity > targetStock) {
-            notification.error(`Cannot add more items. Only ${targetStock} available in stock for this color.`);
+            notification.error(`Cannot add more items. Only ${targetStock} available in stock.`);
             return;
           }
           const newCart = [...currentCart];
@@ -182,13 +177,12 @@ export const CartStore = signalStore(
           saveCart(newCart);
         } else if (typeof productOrId !== 'string') {
           if (quantity > targetStock) {
-            notification.error(`Only ${targetStock} items are available in stock for this color.`);
+            notification.error(`Only ${targetStock} items are available in stock.`);
             return;
           }
           const newItem: CartItem = {
             product: productOrId,
             quantity: quantity,
-            color: color || '',
             priceAtAdd: productOrId.price,
             isPriceChanged: false,
           };
@@ -199,7 +193,7 @@ export const CartStore = signalStore(
 
         if (!isAuthenticated()) return;
         try {
-          await firstValueFrom(cartService.addToCart(productId, quantity, color));
+          await firstValueFrom(cartService.addToCart(productId, quantity));
           notification.success('Cart updated successfully');
         } catch (err) {
           notification.error('Failed to sync cart update');
@@ -209,16 +203,16 @@ export const CartStore = signalStore(
       // ------------------------------------------------------
       // REMOVE ITEM
       // ------------------------------------------------------
-      removeFromCart: async (productId: string, color?: string) => {
+      removeFromCart: async (productId: string) => {
         const newCart = store.cart().filter(
-          (item) => !(item.product._id === productId && (item.color || '').toLowerCase() === (color || '').toLowerCase())
+          (item) => !(item.product._id === productId)
         );
         patchState(store, { cart: newCart });
         saveCart(newCart);
 
         if (!isAuthenticated()) return;
         try {
-          await firstValueFrom(cartService.removeFromCart(productId, color));
+          await firstValueFrom(cartService.removeFromCart(productId));
           notification.success('Item removed');
         } catch (err) {
           notification.error('Failed to sync cart removal');

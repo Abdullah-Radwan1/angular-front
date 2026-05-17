@@ -56,7 +56,6 @@ export class AdminProductsComponent implements OnInit {
       price: [0, [Validators.required, Validators.min(0)]],
       category: ['', Validators.required],
       subcategory: [''],
-      colors: ['', Validators.required], // Handled as string in UI, array in DB
       stock: [0, [Validators.required, Validators.min(0)]],
       isActive: [true],
     });
@@ -165,13 +164,11 @@ export class AdminProductsComponent implements OnInit {
       const categoryId = (product.category as any)?._id || product.category;
       this.updateSubcategories(categoryId);
 
-      // Join colors for display and get total stock
       const displayData = {
         ...product,
         category: categoryId,
         subcategory: (product.subcategory as any)?._id || product.subcategory || '',
-        colors: product.variants?.map((v) => v.color).join(', ') || '',
-        stock: this.getTotalStock(product),
+        stock: product.stock || 0,
       };
       this.productForm.patchValue(displayData);
     } else {
@@ -183,7 +180,7 @@ export class AdminProductsComponent implements OnInit {
   }
 
   getTotalStock(product: Product): number {
-    return product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
+    return product.stock || 0;
   }
 
   closeForm(): void {
@@ -206,27 +203,8 @@ export class AdminProductsComponent implements OnInit {
     const formData = new FormData();
     const rawData = this.productForm.value;
 
-    // Extract colors and stock to build variants
-    const colorString = rawData['colors'] || '';
-    const colorArray =
-      typeof colorString === 'string'
-        ? colorString
-            .split(',')
-            .map((s) => s.trim())
-            .filter((s) => s !== '')
-        : [];
-
-    const stock = Number(rawData['stock']);
-
-    const variants =
-      colorArray.length > 0
-        ? colorArray.map((color) => ({ color, stock }))
-        : [{ color: 'default', stock }];
-
     // Process data before appending to FormData
     Object.keys(rawData).forEach((key) => {
-      if (key === 'colors' || key === 'stock') return; // Handled by variants
-
       let value = rawData[key];
       if (key === 'subcategory' && !value) return; // don't append empty subcategory
 
@@ -236,8 +214,6 @@ export class AdminProductsComponent implements OnInit {
         formData.append(key, value);
       }
     });
-
-    formData.append('variants', JSON.stringify(variants));
 
     if (this.selectedFile) {
       formData.append('image', this.selectedFile);

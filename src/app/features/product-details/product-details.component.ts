@@ -18,7 +18,6 @@ import { NotificationService } from '../../shared/services/notification.service'
 export class ProductDetailsComponent implements OnInit {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
-  selectedColor = signal<string | null>(null);
   isLoading = signal(false); // Used for the initial fetch
   isAdding = signal(false); // Used for the button state
   cartForm: FormGroup;
@@ -38,11 +37,7 @@ export class ProductDetailsComponent implements OnInit {
     });
   }
   getTotalStock(product: Product): number {
-    if (!product.variants || product.variants.length === 0) {
-      return 0;
-    }
-
-    return product.variants.reduce((total, variant) => total + variant.stock, 0);
+    return product.stock || 0;
   }
   ngOnInit(): void {
     // 1. MUST match the key in your app.routes.ts (e.g., path: 'products/:slug')
@@ -70,10 +65,6 @@ export class ProductDetailsComponent implements OnInit {
         this.product.set(product);
         this.isLoading.set(false);
 
-        // Set initial color
-        const firstAvailable = product.variants?.find((v) => v.stock > 0);
-        this.selectedColor.set(firstAvailable?.color ?? null);
-
         // Load related products
         if (product.slug) {
           this.loadRelatedProducts(product.slug);
@@ -98,30 +89,16 @@ export class ProductDetailsComponent implements OnInit {
     });
   }
 
-  selectColor(color: string): void {
-    this.selectedColor.set(color);
-    const variant = this.product()?.variants?.find((v) => v.color === color);
-    const stock = variant ? variant.stock : 0;
-    if (this.cartForm.value.quantity > stock) {
-      this.cartForm.patchValue({ quantity: Math.max(1, stock) });
-    }
-  }
 
-  getSelectedVariantStock(): number {
-    const product = this.product();
-    if (!product || !product.variants) return 0;
-    const variant = product.variants.find((v) => v.color === this.selectedColor());
-    return variant ? variant.stock : 0;
-  }
 
   async addToCart(): Promise<void> {
     if (this.cartForm.invalid || !this.product()) return;
 
     const { quantity } = this.cartForm.value;
-    const stock = this.getSelectedVariantStock();
+    const stock = this.product()?.stock || 0;
 
     if (quantity > stock) {
-      this.notificationService.error(`Only ${stock} items are available in stock for this variant.`);
+      this.notificationService.error(`Only ${stock} items are available in stock.`);
       return;
     }
 

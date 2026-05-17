@@ -28,12 +28,12 @@
                 }}</span>
               }
             </div>
-            @if (getSelectedVariantStock() === 0) {
+            @if (product.stock === 0) {
               <span class="badge badge-error badge-sm">Out of Stock</span>
-            } @else if (getSelectedVariantStock() <= 3) {
-              <span class="badge badge-warning badge-sm">Low Stock ({{ getSelectedVariantStock() }} left)</span>
+            } @else if (product.stock <= 3) {
+              <span class="badge badge-warning badge-sm">Low Stock ({{ product.stock }} left)</span>
             } @else {
-              <span class="badge badge-success badge-sm">In Stock ({{ getSelectedVariantStock() }} available)</span>
+              <span class="badge badge-success badge-sm">In Stock ({{ product.stock }} available)</span>
             }
           </div>
           <h1 class="text-4xl lg:text-5xl font-black mb-4">{{ product.name }}</h1>
@@ -47,51 +47,8 @@
         </div>
 
         <div class="divider"></div>
-
         <!-- Options -->
         <div class="space-y-8 mb-10">
-          @if (product.variants?.length) {
-            <div>
-              <span class="text-xs font-black uppercase tracking-widest opacity-40 block mb-4"
-                >Select Color</span
-              >
-              <div class="flex flex-wrap gap-4">
-                @for (variant of product.variants; track variant.color) {
-                  <button
-                    class="w-10 h-10 rounded-full border-4 transition-all duration-300 hover:scale-110 relative"
-                    [style.background]="variant.color"
-                    [disabled]="variant.stock === 0"
-                    [class.opacity-20]="variant.stock === 0"
-                    [class.border-primary]="selectedColor() === variant.color"
-                    [class.border-transparent]="selectedColor() !== variant.color"
-                    [class.ring-2]="selectedColor() === variant.color"
-                    [class.ring-primary/20]="selectedColor() === variant.color"
-                    (click)="selectColor(variant.color)"
-                  >
-                    @if (selectedColor() === variant.color) {
-                      <div
-                        class="absolute -bottom-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center border-2 border-base-100"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          class="h-2 w-2 text-primary-content"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fill-rule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clip-rule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                    }
-                  </button>
-                }
-              </div>
-            </div>
-          }
-
           <!-- Add to Cart Form -->
           <div class="card bg-base-200/50 p-6 rounded-[2rem] border border-base-200">
             @if (getTotalStock(product) > 0 && authStore.isAuthenticated()) {
@@ -129,7 +86,7 @@
                       type="button"
                       class="btn btn-ghost btn-sm btn-square"
                       (click)="cartForm.patchValue({ quantity: cartForm.value.quantity + 1 })"
-                      [disabled]="cartForm.value.quantity >= getSelectedVariantStock()"
+                      [disabled]="cartForm.value.quantity >= product.stock"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

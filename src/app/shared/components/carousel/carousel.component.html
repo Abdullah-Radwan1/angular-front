@@ -16,11 +16,18 @@
   <!-- Banners -->
   @for (banner of banners; track banner; let index = $index) {
     <div
-      class="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-full px-4 sm:px-6 lg:px-12 py-8 lg:py-0 transition-all duration-500 ease-in-out"
-      [class.hidden]="activeBanner() !== index"
-      [class.flex]="activeBanner() === index"
-      [class.absolute]="activeBanner() !== index"
+      class="flex flex-col lg:flex-row items-center justify-center lg:justify-between w-full px-4 sm:px-6 lg:px-12 py-8 lg:py-0 transition-all duration-700 ease-in-out transform"
+      [class.opacity-100]="activeBanner() === index"
+      [class.scale-100]="activeBanner() === index"
+      [class.pointer-events-auto]="activeBanner() === index"
+      [class.z-10]="activeBanner() === index"
       [class.relative]="activeBanner() === index"
+      [class.opacity-0]="activeBanner() !== index"
+      [class.scale-95]="activeBanner() !== index"
+      [class.pointer-events-none]="activeBanner() !== index"
+      [class.z-0]="activeBanner() !== index"
+      [class.absolute]="activeBanner() !== index"
+      [class.inset-0]="activeBanner() !== index"
     >
       <!-- Text Content -->
       <div
@@ -62,14 +69,14 @@
       </div>
 
       <!-- Image -->
-      <div class="flex-1 flex justify-center lg:justify-end order-1 lg:order-2 mb-6 lg:mb-0">
+      <div class="flex-1 flex justify-center lg:justify-end order-1 lg:order-2 mb-6 lg:mb-0 w-full">
         <img
           fetchpriority="high"
           [src]="banner.img"
           [alt]="banner.title"
           width="420"
           height="420"
-          class="object-cover"
+          class="w-full max-w-[280px] sm:max-w-[350px] lg:max-w-[420px] h-auto aspect-square object-cover rounded-2xl"
           loading="eager"
         />
       </div>

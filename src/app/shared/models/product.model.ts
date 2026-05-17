@@ -1,9 +1,3 @@
-export interface ProductVariant {
-  color: string;
-  size?: string;
-  stock: number;
-}
-
 export interface Category {
   _id: string;
   name: string;
@@ -28,7 +22,7 @@ export interface Product {
 
   category: Category;
   isActive?: boolean;
-  variants: ProductVariant[];
+  stock: number;
 
   tags?: string[];
 

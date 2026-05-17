@@ -46,7 +46,6 @@ export class ProductCardComponent implements OnInit, OnChanges {
   // ------------------------------------------------------
   // NORMAL STATE
   // ------------------------------------------------------
-  selectedColor: string | null = null;
   imageLoaded = false;
 
   productName = '';
@@ -81,23 +80,16 @@ export class ProductCardComponent implements OnInit, OnChanges {
     this.productDescription = this.product.description ?? '';
 
     // Calculate total stock
-    this.totalStock = this.product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) ?? 0;
+    this.totalStock = this.product.stock ?? 0;
 
     // Check stock availability
     this.isInStock = this.totalStock > 0;
-
-    // Select first available color
-    const firstAvailable = this.product.variants?.find((v) => v.stock > 0);
-
-    this.selectedColor = firstAvailable?.color ?? null;
   }
 
   // ------------------------------------------------------
   // SELECT PRODUCT COLOR
   // ------------------------------------------------------
-  selectColor(color: string): void {
-    this.selectedColor = color;
-  }
+
 
   // ------------------------------------------------------
   // ADD TO CART

@@ -176,8 +176,8 @@
               </td>
               <td class="font-mono text-primary font-bold">${{ product.price }}</td>
               <td>
-                <span class="font-mono" [class.text-error]="getTotalStock(product) === 0">{{
-                  getTotalStock(product)
+                <span class="font-mono" [class.text-error]="product.stock === 0">{{
+                  product.stock
                 }}</span>
               </td>
               <td>
@@ -371,20 +371,7 @@
           ></textarea>
         </div>
 
-        <div class="form-control">
-          <label class="label pb-1">
-            <span class="label-text font-bold text-xs uppercase opacity-70">
-              Colors (comma separated)
-            </span>
-          </label>
 
-          <input
-            type="text"
-            formControlName="colors"
-            class="input input-bordered w-full"
-            placeholder="e.g., Red, Blue, Green"
-          />
-        </div>
 
         <div class="form-control w-fit">
           <label class="label cursor-pointer gap-4">

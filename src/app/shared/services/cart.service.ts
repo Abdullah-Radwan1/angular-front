@@ -12,13 +12,12 @@ export class CartService {
     return this.api.get<{ items: CartItem[] }>('/cart');
   }
 
-  addToCart(productId: string, quantity: number, color?: string) {
-    return this.api.post<{ items: CartItem[] }>('/cart/add', { productId, quantity, color });
+  addToCart(productId: string, quantity: number) {
+    return this.api.post<{ items: CartItem[] }>('/cart/add', { productId, quantity });
   }
 
-  removeFromCart(productId: string, color?: string) {
-    const url = color ? `/cart/${productId}?color=${encodeURIComponent(color)}` : `/cart/${productId}`;
-    return this.api.delete<{ items: CartItem[] }>(url);
+  removeFromCart(productId: string) {
+    return this.api.delete<{ items: CartItem[] }>(`/cart/${productId}`);
   }
 
   syncPrices() {
