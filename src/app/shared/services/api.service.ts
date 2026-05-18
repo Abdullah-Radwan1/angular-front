@@ -3,12 +3,13 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 
 import { Observable, throwError } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
+import { URL } from '../../enviroment_variables/ENV';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiService {
-  private readonly baseUrl = 'http://localhost:3000/v1';
+  private readonly baseUrl = URL;
 
   private readonly loading = signal(false);
 

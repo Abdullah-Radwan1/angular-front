@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { URL } from '../ENV';
+import { URL } from '../../enviroment_variables/ENV';
 
 export interface Address {
   _id?: string;
@@ -29,7 +29,6 @@ export class AddressService {
   getUserAddresses(userId: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/user/${userId}`, { withCredentials: true });
   }
-
 
   addAddress(address: Address): Observable<any> {
     return this.http.post(this.apiUrl, address, { withCredentials: true });
