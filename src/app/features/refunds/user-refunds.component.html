@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gradient-to-br from-base-200/50 to-base-100">
+<div class="min-h-screen bg-linear-to-br from-base-200/50 to-base-100">
   <div class="container mx-auto px-4 py-12 max-w-5xl">
     <!-- Header -->
     <div class="mb-12 animate-fade-in">
@@ -11,7 +11,7 @@
         </div>
       </div>
       <h1
-        class="text-4xl lg:text-6xl font-black tracking-tight bg-gradient-to-r from-base-content to-base-content/70 bg-clip-text text-transparent"
+        class="text-4xl lg:text-6xl font-black tracking-tight bg-linear-to-br from-base-content to-base-content/70 bg-clip-text text-transparent"
       >
         Refund Requests
       </h1>
@@ -88,7 +88,7 @@
                         <div
                           class="font-bold text-primary underline decoration-2 underline-offset-4 cursor-pointer"
                         >
-                          #{{ refund.order?._id?.slice(-8) || refund.order }}
+                          #{{ refund.order._id.slice(-8) || refund.order }}
                         </div>
                       </div>
                     </div>
@@ -132,27 +132,30 @@
       @if (totalPages() > 1) {
         <div class="flex justify-center mt-12 animate-fade-in">
           <div class="join bg-base-100 shadow-sm border border-base-200 p-1 rounded-2xl">
-            <button 
-              class="join-item btn btn-sm btn-ghost rounded-xl" 
-              [disabled]="currentPage() === 1" 
-              (click)="changePage(currentPage() - 1)">
+            <button
+              class="join-item btn btn-sm btn-ghost rounded-xl"
+              [disabled]="currentPage() === 1"
+              (click)="changePage(currentPage() - 1)"
+            >
               <svg lucideChevronLeft class="w-4 h-4"></svg>
             </button>
-            
+
             @for (page of pages(); track page) {
-              <button 
-                class="join-item btn btn-sm rounded-xl px-4 font-bold" 
-                [class.btn-primary]="page === currentPage()" 
-                [class.btn-ghost]="page !== currentPage()" 
-                (click)="changePage(page)">
+              <button
+                class="join-item btn btn-sm rounded-xl px-4 font-bold"
+                [class.btn-primary]="page === currentPage()"
+                [class.btn-ghost]="page !== currentPage()"
+                (click)="changePage(page)"
+              >
                 {{ page }}
               </button>
             }
-            
-            <button 
-              class="join-item btn btn-sm btn-ghost rounded-xl" 
-              [disabled]="currentPage() === totalPages()" 
-              (click)="changePage(currentPage() + 1)">
+
+            <button
+              class="join-item btn btn-sm btn-ghost rounded-xl"
+              [disabled]="currentPage() === totalPages()"
+              (click)="changePage(currentPage() + 1)"
+            >
               <svg lucideChevronRight class="w-4 h-4"></svg>
             </button>
           </div>

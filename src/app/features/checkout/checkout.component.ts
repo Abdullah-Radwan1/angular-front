@@ -10,7 +10,7 @@ import { AddressService, Address } from '../../shared/services/address.service';
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './checkout.component.html',
   styles: [],
 })
@@ -47,7 +47,7 @@ export class CheckoutComponent implements OnInit {
       next: (res) => {
         const addresses = res.data?.addresses || [];
         this.savedAddresses.set(addresses);
-        
+
         // Find default or first address and auto-fill
         if (addresses.length > 0) {
           const defaultAddress = addresses.find((addr: Address) => addr.isDefault) || addresses[0];
@@ -115,4 +115,3 @@ export class CheckoutComponent implements OnInit {
     });
   }
 }
-
