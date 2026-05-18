@@ -20,7 +20,7 @@
           <div class="flex items-center gap-2 mb-2">
             <div class="flex gap-1">
               <span class="badge badge-outline badge-sm opacity-50">{{
-                product.category?.name || 'Collection'
+                product.category.name || 'Collection'
               }}</span>
               @if (product.subcategory) {
                 <span class="badge badge-outline badge-sm opacity-50">{{
@@ -33,7 +33,12 @@
             } @else if (product.stock <= 3) {
               <span class="badge badge-warning badge-sm">Low Stock ({{ product.stock }} left)</span>
             } @else {
-              <span class="badge badge-success badge-sm">In Stock ({{ product.stock }} available)</span>
+              <span class="badge badge-success badge-sm"
+                >In Stock ({{ product.stock }} available)</span
+              >
+            }
+            @if (quantityInCart > 0) {
+              <span class="badge badge-info badge-sm font-semibold">({{ quantityInCart }} in Cart)</span>
             }
           </div>
           <h1 class="text-4xl lg:text-5xl font-black mb-4">{{ product.name }}</h1>
@@ -50,7 +55,7 @@
         <!-- Options -->
         <div class="space-y-8 mb-10">
           <!-- Add to Cart Form -->
-          <div class="card bg-base-200/50 p-6 rounded-[2rem] border border-base-200">
+          <div class="card bg-base-200/50 p-6 rounded-4xl border border-base-200">
             @if (getTotalStock(product) > 0 && authStore.isAuthenticated()) {
               <form [formGroup]="cartForm" (ngSubmit)="addToCart()" class="flex flex-col gap-6">
                 <div class="flex items-center justify-between">
@@ -60,7 +65,7 @@
                       type="button"
                       class="btn btn-ghost btn-sm btn-square"
                       (click)="cartForm.patchValue({ quantity: cartForm.value.quantity - 1 })"
-                      [disabled]="cartForm.value.quantity <= 1"
+                      [disabled]="cartForm.value.quantity <= 1 || isCartLimitReached"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +91,7 @@
                       type="button"
                       class="btn btn-ghost btn-sm btn-square"
                       (click)="cartForm.patchValue({ quantity: cartForm.value.quantity + 1 })"
-                      [disabled]="cartForm.value.quantity >= product.stock"
+                      [disabled]="cartForm.value.quantity >= (product.stock - quantityInCart) || isCartLimitReached"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -108,10 +113,12 @@
                 <button
                   type="submit"
                   class="btn btn-primary btn-lg rounded-2xl h-16 text-lg font-black shadow-lg shadow-primary/20 group"
-                  [disabled]="cartForm.invalid || isAdding()"
+                  [disabled]="cartForm.invalid || isAdding() || isCartLimitReached"
                 >
                   @if (isAdding()) {
                     <span class="loading loading-spinner"></span>
+                  } @else if (isCartLimitReached) {
+                    Limit Reached
                   } @else {
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

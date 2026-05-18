@@ -49,11 +49,13 @@
     <div class="card-actions mt-2 flex flex-col gap-2">
       <button
         class="btn btn-neutral btn-sm w-full gap-2 rounded-xl"
-        [disabled]="!isInStock || isAdding()"
+        [disabled]="!isInStock || isAdding() || isCartLimitReached"
         (click)="addToCart()"
       >
         @if (isAdding()) {
           <span class="loading loading-spinner loading-xs"></span>
+        } @else if (isCartLimitReached) {
+          Limit Reached
         } @else {
           <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -12,6 +12,7 @@ import { firstValueFrom, Subject, debounceTime } from 'rxjs';
 import { NotificationService } from '../shared/services/notification.service';
 import { Product, CartItem as SharedCartItem } from '../shared/models/api-response-model';
 import { CartService } from '../shared/services/cart.service';
+import { ProductService } from '../shared/services/product.service';
 
 export type CartItem = SharedCartItem & { product: Product };
 
@@ -79,6 +80,7 @@ export const CartStore = signalStore(
   withMethods((store) => {
     const cartService = inject(CartService);
     const notification = inject(NotificationService);
+    const productService = inject(ProductService);
 
     // 🚀 1. Debounce logic variables
     const pendingDeltas = new Map<string, number>(); // productId -> total delta to send
@@ -158,8 +160,27 @@ export const CartStore = signalStore(
           product = productOrId;
         }
 
-        if (product) {
-          targetStock = product.stock || 0;
+        // Only fetch latest stock from database if we are incrementing quantity
+        if (quantity > 0) {
+          try {
+            const dbProduct = await firstValueFrom(productService.getProductById(productId));
+            if (dbProduct) {
+              targetStock = dbProduct.stock || 0;
+              if (product) {
+                product.stock = targetStock;
+                product.price = dbProduct.price;
+              }
+            }
+          } catch (err) {
+            console.error('Failed to fetch product from database', err);
+            if (product) {
+              targetStock = product.stock || 0;
+            }
+          }
+        } else {
+          if (product) {
+            targetStock = product.stock || 0;
+          }
         }
 
         if (existingItemIndex > -1) {

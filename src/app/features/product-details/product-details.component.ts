@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -35,7 +35,44 @@ export class ProductDetailsComponent implements OnInit {
     this.cartForm = this.fb.group({
       quantity: [1, [Validators.required, Validators.min(1)]],
     });
+
+    // Automatically adjust quantity input if it exceeds remaining stock
+    effect(() => {
+      const prod = this.product();
+      if (!prod) return;
+
+      const remaining = (prod.stock || 0) - this.quantityInCart;
+      const qtyControl = this.cartForm.get('quantity');
+      if (!qtyControl) return;
+
+      const currentQty = qtyControl.value || 1;
+      if (remaining <= 0) {
+        qtyControl.patchValue(0);
+        qtyControl.disable();
+      } else {
+        qtyControl.enable();
+        if (currentQty > remaining) {
+          qtyControl.patchValue(remaining);
+        } else if (currentQty < 1) {
+          qtyControl.patchValue(1);
+        }
+      }
+    });
   }
+
+  get quantityInCart(): number {
+    const prod = this.product();
+    if (!prod) return 0;
+    const item = this.cartStore.cart().find((i) => i.product._id === prod._id);
+    return item ? item.quantity : 0;
+  }
+
+  get isCartLimitReached(): boolean {
+    const prod = this.product();
+    if (!prod) return false;
+    return this.quantityInCart >= (prod.stock || 0);
+  }
+
   getTotalStock(product: Product): number {
     return product.stock || 0;
   }

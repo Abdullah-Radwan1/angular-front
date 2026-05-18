@@ -87,9 +87,19 @@ export class ProductCardComponent implements OnInit, OnChanges {
   }
 
   // ------------------------------------------------------
-  // SELECT PRODUCT COLOR
+  // GETTERS FOR STOCK LIMITS
   // ------------------------------------------------------
+  get quantityInCart(): number {
+    if (!this.product) return 0;
+    const item = this.cartStore.cart().find(
+      (i) => i.product._id === this.product._id
+    );
+    return item ? item.quantity : 0;
+  }
 
+  get isCartLimitReached(): boolean {
+    return this.quantityInCart >= this.totalStock;
+  }
 
   // ------------------------------------------------------
   // ADD TO CART
