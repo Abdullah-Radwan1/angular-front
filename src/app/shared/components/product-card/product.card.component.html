@@ -44,23 +44,47 @@
       </p>
     }
 
-
-
     <div class="card-actions mt-2 flex flex-col gap-2">
-      <button
-        class="btn btn-neutral btn-sm w-full gap-2 rounded-xl"
-        [disabled]="!isInStock || isAdding() || isCartLimitReached"
-        (click)="addToCart()"
-      >
-        @if (isAdding()) {
-          <span class="loading loading-spinner loading-xs"></span>
-        } @else if (isCartLimitReached) {
-          Limit Reached
-        } @else {
+      @if (!authStore.isAdmin()) {
+        <button
+          class="btn btn-neutral btn-sm w-full gap-2 rounded-xl"
+          [disabled]="!isInStock || isAdding() || isCartLimitReached"
+          (click)="addToCart()"
+        >
+          @if (isAdding()) {
+            <span class="loading loading-spinner loading-xs"></span>
+          } @else if (isCartLimitReached) {
+            Limit Reached
+          } @else {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="8" cy="21" r="1" />
+              <circle cx="19" cy="21" r="1" />
+              <path
+                d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12"
+              />
+            </svg>
+            Add to Cart
+          }
+        </button>
+        <a
+          [routerLink]="['/product', product.slug]"
+          class="btn btn-ghost btn-xs w-full text-base-content/50 hover:text-primary transition-colors font-bold uppercase tracking-tighter"
+        >
+          View Details
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
+            width="12"
+            height="12"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -68,35 +92,10 @@
             stroke-linecap="round"
             stroke-linejoin="round"
           >
-            <circle cx="8" cy="21" r="1" />
-            <circle cx="19" cy="21" r="1" />
-            <path
-              d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.56-7.43H5.12"
-            />
+            <path d="M5 12h14m-7-7 7 7-7 7" />
           </svg>
-          Add to Cart
-        }
-      </button>
-
-      <a
-        [routerLink]="['/product', product.slug]"
-        class="btn btn-ghost btn-xs w-full text-base-content/50 hover:text-primary transition-colors font-bold uppercase tracking-tighter"
-      >
-        View Details
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="3"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M5 12h14m-7-7 7 7-7 7" />
-        </svg>
-      </a>
+        </a>
+      }
     </div>
   </div>
 </div>

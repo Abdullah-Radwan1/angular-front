@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 import { Product } from '../../models/api-response-model';
 import { CartStore } from '../../../store/cart.store';
 import { RouterLink } from '@angular/router';
+import { AuthStore } from '../../../store/auth.store';
 
 @Component({
   selector: 'app-product-card',
@@ -34,7 +35,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
   // INJECT STORE
   // ------------------------------------------------------
   readonly cartStore = inject(CartStore);
-
+  readonly authStore = inject(AuthStore);
   // ------------------------------------------------------
   // SIGNALS
   // ------------------------------------------------------
@@ -91,9 +92,7 @@ export class ProductCardComponent implements OnInit, OnChanges {
   // ------------------------------------------------------
   get quantityInCart(): number {
     if (!this.product) return 0;
-    const item = this.cartStore.cart().find(
-      (i) => i.product._id === this.product._id
-    );
+    const item = this.cartStore.cart().find((i) => i.product._id === this.product._id);
     return item ? item.quantity : 0;
   }
 

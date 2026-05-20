@@ -16,6 +16,7 @@ import { FooterComponent } from './layout/footer/footer.component';
     LoadingComponent,
   ],
   templateUrl: './app.html',
+  styleUrl: './app.css',
 })
 export class App {
   protected readonly title = signal('eceommerce');
